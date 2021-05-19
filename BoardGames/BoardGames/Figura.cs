@@ -76,6 +76,77 @@ namespace BoardGames
             pozicija = p;
         }
 
+        private bool Sah(Boja b, ref List<Figura> ecovece)
+        {
+            Point pozicijaKralja = new Point(1, 1);
+            foreach (var x in ecovece)
+            {
+                if (x.GetBoja() == b && x.Vrsta == "kralj")
+                {
+                    pozicijaKralja = x.GetPozicija();
+                }
+            }
+
+            foreach (var x in ecovece)
+            {
+                if (x.GetBoja() != b)
+                {
+                    foreach (var y in x.MoguciPotezi(ecovece))
+                    {
+                        if (y == pozicijaKralja)
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private List<Figura> KopiranjeListe(ref List<Figura> figure)
+        {
+            List<Figura> kopija = new List<Figura>();
+            foreach (var x in figure)
+            {
+                switch (x.Vrsta)
+                {
+                    case "kralj":
+                        kopija.Add(new Kralj(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "dama":
+                        kopija.Add(new Dama(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "top":
+                        kopija.Add(new Top(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "lovac":
+                        kopija.Add(new Lovac(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "skakac":
+                        kopija.Add(new Skakac(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "pesak":
+                        kopija.Add(new Pesak(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                }
+            }
+            return kopija;
+        }
+        /*
+        private int NadjiFiguru(Point pozicija, ref List<Figura> jesvala)
+        {
+            int poz = -1;
+            int i = 0;
+            foreach (var x in jesvala)
+            {
+                Point autizam = x.GetPozicija();
+                if (x.GetPozicija() == pozicija)
+                {
+                    poz = i;
+                    break;
+                }
+                i++;
+            }
+            return poz;
+        }*/
         private bool InBound(Point p)
         {
             if (p.X < 0 || p.X > 7 || p.Y < 0 || p.Y > 7)
@@ -90,6 +161,32 @@ namespace BoardGames
             new Point(this.pozicija.X - 1, this.pozicija.Y), new Point(this.pozicija.X + 1, this.pozicija.Y), new Point(this.pozicija.X - 1, this.pozicija.Y + 1),
             new Point(this.pozicija.X, this.pozicija.Y + 1), new Point(this.pozicija.X + 1, this.pozicija.Y + 1)};
 
+            /*List<Figura> kopija = KopiranjeListe(ref figure);
+
+            int poz = 0;
+
+            for(int i = 0; i < kopija.Count; i++)
+            {
+                if (kopija[i].GetPozicija() == pozicija)
+                {
+                    poz = i;
+                    break;
+                }
+            }
+
+            //Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("Crna kraljica.png"));
+
+            foreach (var potez in tacke)
+            {
+                kopija[poz].OdigrajPotez(potez, ref kopija);
+                if (!Sah(boja, ref kopija))
+                {
+                    potezi.Add(potez);
+                }
+                kopija = KopiranjeListe(ref figure);
+            }*/
+
+            
             List<Point> wtf;
             foreach(var x  in tacke)
             {

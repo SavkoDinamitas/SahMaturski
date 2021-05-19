@@ -196,7 +196,7 @@ namespace BoardGames
             }
         }
         
-        private bool Sah(Boja b, ref List<Figura> ecovece)
+        public bool Sah(Boja b, ref List<Figura> ecovece)
         {
             Point pozicijaKralja = new Point(1, 1);
             foreach(var x in ecovece)
@@ -223,18 +223,33 @@ namespace BoardGames
 
         private bool Mat(Boja b, ref List<Figura> ecovece)
         {
-            foreach(var figura in ecovece)
+            List<Figura> kopija = KopiranjeListe(ref ecovece);
+            for(int i = 0; i < kopija.Count; i++)
             {
-                var pozicija = figura.GetPozicija();
-                var potezi = figura.MoguciPotezi(ecovece);
-                foreach(var potez in potezi)
+                Figura figura = kopija[i]; 
+                if(figura.GetBoja() == b)
                 {
-                    figura.OdigrajPotez(potez, ref ecovece);
-                    if (!Sah(b, ref ecovece))
-                        return false;
-                    figura.OdigrajPotez(pozicija, ref ecovece);
+                    var pozicija = figura.GetPozicija();
+                    var potezi = figura.MoguciPotezi(kopija);
+                    Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("Crna kraljica.png"));
+                    foreach (var potez in potezi)
+                    {
+                        int index = NadjiFiguru(potez, ref kopija);
+                        if (index != -1)
+                            pojedena = kopija[index];
+                        figura.OdigrajPotez(potez, ref kopija);
+                        if (!Sah(b, ref kopija))
+                        {
+                            this.Text = figura.Vrsta + " " + potez.X.ToString() + " " + potez.Y.ToString();
+                            return false;
+                        }
+                        figura.SetPozicija(pozicija);
+                        if (index != -1)
+                            kopija.Add(pojedena);
+                    }
                 }
             }
+                
             return true;
         }
 
@@ -315,7 +330,8 @@ namespace BoardGames
                         int figpoz = NadjiFiguru(new Point(i, j));
                         if (figpoz != -1 && figure[figpoz].GetBoja() == Boja.bela)
                         {
-                            ObojiMogucaPolja(figure[figpoz].MoguciPotezi(figure));
+                            //ObojiMogucaPolja(figure[figpoz].MoguciPotezi(figure));
+                            tabla[i, j].BackColor = Color.LightBlue;
                             selektovanje = false;
                             potez = figure[figpoz];
                         }
@@ -383,13 +399,13 @@ namespace BoardGames
                                     }
                                 }
                             }
-                            /*
+                            
                             List<Figura> kopija = KopiranjeListe(ref figure);
-                            if (Mat(Boja.crna, kopija))
+                            if (Mat(Boja.crna, ref kopija))
                             {
                                 MessageBox.Show("Beli je pobedio");
                                 matic = true;
-                            }*/
+                            }
                         }
                         else
                         {
@@ -406,7 +422,8 @@ namespace BoardGames
                         int figpoz = NadjiFiguru(new Point(i, j));
                         if (figpoz != -1 && figure[figpoz].GetBoja() == Boja.crna)
                         {
-                            ObojiMogucaPolja(figure[figpoz].MoguciPotezi(figure));
+                            //ObojiMogucaPolja(figure[figpoz].MoguciPotezi(figure));
+                            tabla[i, j].BackColor = Color.LightBlue;
                             selektovanje = false;
                             potez = figure[figpoz];
                         }
@@ -474,13 +491,13 @@ namespace BoardGames
                                     }
                                 }
                             }
-                            /*
+                            
                             List<Figura> kopija = KopiranjeListe(ref figure);
-                                if (Mat(Boja.bela, kopija))
+                                if (Mat(Boja.bela, ref kopija))
                                 {
                                     MessageBox.Show("Crni je pobedio");
                                     matic = true;
-                                }*/
+                                }
                         }
                         else
                         {
