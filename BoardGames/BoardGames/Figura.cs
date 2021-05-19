@@ -16,6 +16,7 @@ namespace BoardGames
         bela,
         crna
     }
+
     public abstract class Figura
     {
         protected Point pozicija;
@@ -91,10 +92,24 @@ namespace BoardGames
             {
                 if (x.GetBoja() != b)
                 {
-                    foreach (var y in x.MoguciPotezi(ecovece))
+                    if(x.Vrsta != "kralj")
                     {
-                        if (y == pozicijaKralja)
-                            return true;
+                        foreach (var y in x.MoguciPotezi(ecovece))
+                        {
+                            if (y == pozicijaKralja)
+                                return true;
+                        }
+                    }  
+                    else
+                    {
+                        Point[] tacke = {new Point(x.GetPozicija().X - 1, x.GetPozicija().Y - 1), new Point(x.GetPozicija().X, x.GetPozicija().Y - 1), new Point(x.GetPozicija().X + 1, x.GetPozicija().Y - 1),
+                        new Point(x.GetPozicija().X - 1, x.GetPozicija().Y), new Point(x.GetPozicija().X + 1, x.GetPozicija().Y), new Point(x.GetPozicija().X - 1, x.GetPozicija().Y + 1),
+                        new Point(x.GetPozicija().X, x.GetPozicija().Y + 1), new Point(x.GetPozicija().X + 1, x.GetPozicija().Y + 1)};
+                        foreach(var y in tacke)
+                        {
+                            if (y == pozicijaKralja)
+                                return true;
+                        }
                     }
                 }
             }
@@ -130,23 +145,7 @@ namespace BoardGames
             }
             return kopija;
         }
-        /*
-        private int NadjiFiguru(Point pozicija, ref List<Figura> jesvala)
-        {
-            int poz = -1;
-            int i = 0;
-            foreach (var x in jesvala)
-            {
-                Point autizam = x.GetPozicija();
-                if (x.GetPozicija() == pozicija)
-                {
-                    poz = i;
-                    break;
-                }
-                i++;
-            }
-            return poz;
-        }*/
+
         private bool InBound(Point p)
         {
             if (p.X < 0 || p.X > 7 || p.Y < 0 || p.Y > 7)
@@ -161,32 +160,31 @@ namespace BoardGames
             new Point(this.pozicija.X - 1, this.pozicija.Y), new Point(this.pozicija.X + 1, this.pozicija.Y), new Point(this.pozicija.X - 1, this.pozicija.Y + 1),
             new Point(this.pozicija.X, this.pozicija.Y + 1), new Point(this.pozicija.X + 1, this.pozicija.Y + 1)};
 
-            /*List<Figura> kopija = KopiranjeListe(ref figure);
+            List<Figura> kopija = KopiranjeListe(ref figure);
 
-            int poz = 0;
-
+            int pozicijaKralja = 0;
             for(int i = 0; i < kopija.Count; i++)
             {
-                if (kopija[i].GetPozicija() == pozicija)
+                if(kopija[i].GetPozicija() == pozicija)
                 {
-                    poz = i;
+                    pozicijaKralja = i;
                     break;
                 }
             }
 
-            //Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("Crna kraljica.png"));
 
-            foreach (var potez in tacke)
+            foreach(var potez in tacke)
             {
-                kopija[poz].OdigrajPotez(potez, ref kopija);
+                kopija[pozicijaKralja].OdigrajPotez(potez, ref kopija);
                 if (!Sah(boja, ref kopija))
                 {
                     potezi.Add(potez);
                 }
                 kopija = KopiranjeListe(ref figure);
-            }*/
+            }
 
-            
+
+            /*
             List<Point> wtf;
             foreach(var x  in tacke)
             {
@@ -243,9 +241,11 @@ namespace BoardGames
                         potezi.Add(x);
                     }
                 }
-            }
+            }*/
             //mala rokada belog kralja
-            if(boja == Boja.bela)
+            List<Point> wtf;
+
+            if (boja == Boja.bela)
             {
                 if (pozicija.X == 4 && pozicija.Y == 7)
                 {
@@ -1375,6 +1375,11 @@ namespace BoardGames
                 }
             }
 
+            if(pozicija.Y == 3 && boja == Boja.bela)
+            {
+
+            }
+
             return potezi;
         }
 
@@ -1401,10 +1406,11 @@ namespace BoardGames
                         figure.RemoveAt(i);
                     }
                     pozicija = p;
+                    /*
                     if(pozicija.Y == 0 || pozicija.Y == 7)
                     {
                         return false;
-                    }
+                    }*/
                     return true;
                 }
             }

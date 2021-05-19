@@ -18,3 +18,13 @@ C:\Users\Laptop\Documents\GitHub\Sah\BoardGames\BoardGames\obj\Debug\BoardGames.
 C:\Users\Laptop\Documents\GitHub\Sah\BoardGames\BoardGames\obj\Debug\BoardGames.csproj.CoreCompileInputs.cache
 C:\Users\Laptop\Documents\GitHub\Sah\BoardGames\BoardGames\obj\Debug\BoardGames.exe
 C:\Users\Laptop\Documents\GitHub\Sah\BoardGames\BoardGames\obj\Debug\BoardGames.pdb
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\bin\Debug\BoardGames.exe.config
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\bin\Debug\BoardGames.exe
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\bin\Debug\BoardGames.pdb
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\obj\Debug\BoardGames.csprojAssemblyReference.cache
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\obj\Debug\BoardGames.Form1.resources
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\obj\Debug\BoardGames.Properties.Resources.resources
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\obj\Debug\BoardGames.csproj.GenerateResource.cache
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\obj\Debug\BoardGames.csproj.CoreCompileInputs.cache
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\obj\Debug\BoardGames.exe
+C:\Users\dandzic17\Documents\GitHub\SahMaturski\BoardGames\BoardGames\obj\Debug\BoardGames.pdb
