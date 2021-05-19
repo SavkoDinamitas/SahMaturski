@@ -1,0 +1,10 @@
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\bin\Debug\BoardGames.exe.config
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\bin\Debug\BoardGames.exe
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\bin\Debug\BoardGames.pdb
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\obj\Debug\BoardGames.csprojAssemblyReference.cache
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\obj\Debug\BoardGames.Form1.resources
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\obj\Debug\BoardGames.Properties.Resources.resources
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\obj\Debug\BoardGames.csproj.GenerateResource.cache
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\obj\Debug\BoardGames.csproj.CoreCompileInputs.cache
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\obj\Debug\BoardGames.exe
+C:\Users\Laptop\source\repos\BoardGames\BoardGames\obj\Debug\BoardGames.pdb
