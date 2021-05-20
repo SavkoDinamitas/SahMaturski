@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -9,8 +10,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
 namespace BoardGames
 {
+    public struct PoljeInfo
+    {
+        public bool zauzeto;
+        public Boja boja;
+    }
     public enum Boja
     {
         bela,
@@ -30,9 +37,11 @@ namespace BoardGames
 
         public abstract Image GetImage();
 
-        public abstract List<Point> MoguciPotezi(List<Figura> figure);
+        public abstract List<Point> MoguciPotezi(List<Figura> figure, ref PoljeInfo[,] polja);
 
-        public abstract bool OdigrajPotez(Point p, ref List<Figura> figure);
+        public abstract List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja);
+
+        public abstract bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja);
 
         public Point GetPozicija()
         {
@@ -56,6 +65,7 @@ namespace BoardGames
     public class Kralj : Figura
     {
         Image slika;
+        private bool pomerioSe = false;
 
         public Kralj(Point pozicija, Boja boja, Image slika):base(pozicija, boja)
         {
@@ -77,75 +87,6 @@ namespace BoardGames
             pozicija = p;
         }
 
-        private bool Sah(Boja b, ref List<Figura> ecovece)
-        {
-            Point pozicijaKralja = new Point(1, 1);
-            foreach (var x in ecovece)
-            {
-                if (x.GetBoja() == b && x.Vrsta == "kralj")
-                {
-                    pozicijaKralja = x.GetPozicija();
-                }
-            }
-
-            foreach (var x in ecovece)
-            {
-                if (x.GetBoja() != b)
-                {
-                    if(x.Vrsta != "kralj")
-                    {
-                        foreach (var y in x.MoguciPotezi(ecovece))
-                        {
-                            if (y == pozicijaKralja)
-                                return true;
-                        }
-                    }  
-                    else
-                    {
-                        Point[] tacke = {new Point(x.GetPozicija().X - 1, x.GetPozicija().Y - 1), new Point(x.GetPozicija().X, x.GetPozicija().Y - 1), new Point(x.GetPozicija().X + 1, x.GetPozicija().Y - 1),
-                        new Point(x.GetPozicija().X - 1, x.GetPozicija().Y), new Point(x.GetPozicija().X + 1, x.GetPozicija().Y), new Point(x.GetPozicija().X - 1, x.GetPozicija().Y + 1),
-                        new Point(x.GetPozicija().X, x.GetPozicija().Y + 1), new Point(x.GetPozicija().X + 1, x.GetPozicija().Y + 1)};
-                        foreach(var y in tacke)
-                        {
-                            if (y == pozicijaKralja)
-                                return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        private List<Figura> KopiranjeListe(ref List<Figura> figure)
-        {
-            List<Figura> kopija = new List<Figura>();
-            foreach (var x in figure)
-            {
-                switch (x.Vrsta)
-                {
-                    case "kralj":
-                        kopija.Add(new Kralj(x.GetPozicija(), x.GetBoja(), x.GetImage()));
-                        break;
-                    case "dama":
-                        kopija.Add(new Dama(x.GetPozicija(), x.GetBoja(), x.GetImage()));
-                        break;
-                    case "top":
-                        kopija.Add(new Top(x.GetPozicija(), x.GetBoja(), x.GetImage()));
-                        break;
-                    case "lovac":
-                        kopija.Add(new Lovac(x.GetPozicija(), x.GetBoja(), x.GetImage()));
-                        break;
-                    case "skakac":
-                        kopija.Add(new Skakac(x.GetPozicija(), x.GetBoja(), x.GetImage()));
-                        break;
-                    case "pesak":
-                        kopija.Add(new Pesak(x.GetPozicija(), x.GetBoja(), x.GetImage()));
-                        break;
-                }
-            }
-            return kopija;
-        }
-
         private bool InBound(Point p)
         {
             if (p.X < 0 || p.X > 7 || p.Y < 0 || p.Y > 7)
@@ -153,99 +94,57 @@ namespace BoardGames
             return true;
         }
 
-        public override List<Point> MoguciPotezi(List<Figura> figure)
+        public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
             List<Point> potezi = new List<Point>();
-            Point[] tacke = {new Point(this.pozicija.X - 1, this.pozicija.Y - 1), new Point(this.pozicija.X, this.pozicija.Y - 1), new Point(this.pozicija.X + 1, this.pozicija.Y - 1),
-            new Point(this.pozicija.X - 1, this.pozicija.Y), new Point(this.pozicija.X + 1, this.pozicija.Y), new Point(this.pozicija.X - 1, this.pozicija.Y + 1),
-            new Point(this.pozicija.X, this.pozicija.Y + 1), new Point(this.pozicija.X + 1, this.pozicija.Y + 1)};
-
-            List<Figura> kopija = KopiranjeListe(ref figure);
-
-            int pozicijaKralja = 0;
-            for(int i = 0; i < kopija.Count; i++)
-            {
-                if(kopija[i].GetPozicija() == pozicija)
-                {
-                    pozicijaKralja = i;
-                    break;
-                }
-            }
-
-
-            foreach(var potez in tacke)
-            {
-                kopija[pozicijaKralja].OdigrajPotez(potez, ref kopija);
-                if (!Sah(boja, ref kopija))
-                {
-                    potezi.Add(potez);
-                }
-                kopija = KopiranjeListe(ref figure);
-            }
-
-
-            /*
-            List<Point> wtf;
-            foreach(var x  in tacke)
+            Point[] tacke = {new Point(pozicija.X - 1, pozicija.Y - 1), new Point(pozicija.X, pozicija.Y - 1), new Point(pozicija.X + 1, pozicija.Y - 1),
+            new Point(pozicija.X - 1, pozicija.Y), new Point(pozicija.X + 1, pozicija.Y), new Point(pozicija.X - 1, pozicija.Y + 1),
+            new Point(pozicija.X, pozicija.Y + 1), new Point(pozicija.X + 1, pozicija.Y + 1)};
+            foreach (var x in tacke)
             {
                 if (InBound(x))
                 {
+                    potezi.Add(x);
+                }
+            }
+            return potezi;
+        }
+
+        public override List<Point> MoguciPotezi(List<Figura> figure, ref PoljeInfo[,] polja)
+        {
+            List<Point> potezi = new List<Point>();
+            Point[] tacke = {new Point(pozicija.X - 1, pozicija.Y - 1), new Point(pozicija.X, pozicija.Y - 1), new Point(pozicija.X + 1, pozicija.Y - 1),
+            new Point(pozicija.X - 1, pozicija.Y), new Point(pozicija.X + 1, pozicija.Y), new Point(pozicija.X - 1, pozicija.Y + 1),
+            new Point(pozicija.X, pozicija.Y + 1), new Point(pozicija.X + 1, pozicija.Y + 1)};
+
+            
+                foreach(var x in tacke)
+                {
                     bool pomoc = false;
-                    foreach(var y in figure)
+                    foreach(var figura in figure)
                     {
-                        if(y.GetBoja() != boja)
-                        {
-                            if(y.Vrsta == "kralj")
+                        if (figura.GetBoja() != boja)
+                            foreach (var komedija in figura.NapadnutaPolja(figure, ref polja))
                             {
-                                wtf = new List<Point>() {new Point(y.GetPozicija().X - 1, y.GetPozicija().Y - 1), new Point(y.GetPozicija().X, y.GetPozicija().Y - 1), new Point(y.GetPozicija().X + 1, y.GetPozicija().Y - 1),
-                                new Point(y.GetPozicija().X - 1, y.GetPozicija().Y), new Point(y.GetPozicija().X + 1, y.GetPozicija().Y), new Point(y.GetPozicija().X - 1, y.GetPozicija().Y + 1),
-                                new Point(y.GetPozicija().X, y.GetPozicija().Y + 1), new Point(y.GetPozicija().X + 1, y.GetPozicija().Y + 1)};
-                            }
-                            else if(y.Vrsta == "pesak")
-                            {
-                                if(y.GetBoja() == Boja.bela)
-                                {
-                                    wtf = new List<Point>() { new Point(y.GetPozicija().X + 1, y.GetPozicija().Y - 1), new Point(y.GetPozicija().X - 1, y.GetPozicija().Y - 1) };
-                                }
-                                else
-                                {
-                                    wtf = new List<Point>() { new Point(y.GetPozicija().X + 1, y.GetPozicija().Y + 1), new Point(y.GetPozicija().X - 1, y.GetPozicija().Y + 1) };
-                                }
-                            }
-                            else
-                            {
-                                wtf = y.MoguciPotezi(figure);
-                            }
-                            foreach (var k in wtf)
-                            {
-                                if (k == x)
+                                if (komedija == x)
                                 {
                                     pomoc = true;
-                                    break;
                                 }
                             }
-                        }
-                        
-
-                        if (y.GetPozicija() == x && boja == y.GetBoja())
+                        else
                         {
-                            pomoc = true;
-                            break;
+                            if (figura.GetPozicija() == x)
+                                pomoc = true;
                         }
-
-                        if (pomoc)
-                            break;
                     }
-                    if (!pomoc)
-                    {
+                    if (!pomoc && InBound(x))
                         potezi.Add(x);
-                    }
                 }
-            }*/
+
             //mala rokada belog kralja
             List<Point> wtf;
 
-            if (boja == Boja.bela)
+            if (boja == Boja.bela && !pomerioSe)
             {
                 if (pozicija.X == 4 && pozicija.Y == 7)
                 {
@@ -285,7 +184,7 @@ namespace BoardGames
                             }
                             else
                             {
-                                wtf = x.MoguciPotezi(figure);
+                                wtf = x.NapadnutaPolja(figure, ref polja);
                             }
 
                             foreach (var y in wtf)
@@ -323,7 +222,7 @@ namespace BoardGames
             }
 
             //mala rokada crnog kralja
-            else
+            else if(!pomerioSe)
             {
                 if (pozicija.X == 4 && pozicija.Y == 0)
                 {
@@ -363,7 +262,7 @@ namespace BoardGames
                             }
                             else
                             {
-                                wtf = x.MoguciPotezi(figure);
+                                wtf = x.NapadnutaPolja(figure, ref polja);
                             }
 
                             foreach (var y in wtf)
@@ -400,7 +299,7 @@ namespace BoardGames
             }
 
             //velika rokada belog kralja
-            if (boja == Boja.bela)
+            if (boja == Boja.bela && !pomerioSe)
             {
                 if (pozicija.X == 4 && pozicija.Y == 7)
                 {
@@ -440,7 +339,7 @@ namespace BoardGames
                             }
                             else
                             {
-                                wtf = x.MoguciPotezi(figure);
+                                wtf = x.NapadnutaPolja(figure, ref polja);
                             }
 
                             foreach (var y in wtf)
@@ -479,7 +378,7 @@ namespace BoardGames
             }
 
             //velika rokada crnog kralja
-            else
+            else if(!pomerioSe)
             {
                 if (pozicija.X == 4 && pozicija.Y == 0)
                 {
@@ -498,7 +397,7 @@ namespace BoardGames
                             break;
                         }
 
-                        foreach (var y in x.MoguciPotezi(figure))
+                        foreach (var y in x.NapadnutaPolja(figure, ref polja))
                         {
                             if (y == new Point(3, 0) && boja != x.GetBoja())
                             {
@@ -533,9 +432,9 @@ namespace BoardGames
             return potezi;
         }
 
-        public override bool OdigrajPotez(Point p, ref List<Figura> figure)
+        public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
         {
-            foreach(var x in this.MoguciPotezi(figure))
+            foreach(var x in this.MoguciPotezi(figure, ref polja))
             {
                 if(p == x)
                 {
@@ -564,6 +463,9 @@ namespace BoardGames
                                 if(top.Vrsta == "top" && top.GetPozicija() == new Point(0, 7))
                                 {
                                     top.SetPozicija(new Point(3, 7));
+                                    polja[0, 7].zauzeto = false;
+                                    polja[3, 7].zauzeto = true;
+                                    polja[3, 7].boja = boja;
                                     break;
                                 }
                             }
@@ -576,6 +478,9 @@ namespace BoardGames
                                 if (top.Vrsta == "top" && top.GetPozicija() == new Point(7, 7))
                                 {
                                     top.SetPozicija(new Point(5, 7));
+                                    polja[7, 7].zauzeto = false;
+                                    polja[5, 7].zauzeto = true;
+                                    polja[5, 7].boja = boja;
                                     break;
                                 }
                             }
@@ -588,6 +493,9 @@ namespace BoardGames
                                 if (top.Vrsta == "top" && top.GetPozicija() == new Point(0, 0))
                                 {
                                     top.SetPozicija(new Point(3, 0));
+                                    polja[0, 0].zauzeto = false;
+                                    polja[3, 0].zauzeto = true;
+                                    polja[3, 0].boja = boja;
                                     break;
                                 }
                             }
@@ -600,12 +508,20 @@ namespace BoardGames
                                 if (top.Vrsta == "top" && top.GetPozicija() == new Point(7, 0))
                                 {
                                     top.SetPozicija(new Point(5, 0));
+                                    polja[7, 0].zauzeto = false;
+                                    polja[5, 0].zauzeto = true;
+                                    polja[5, 0].boja = boja;
                                     break;
                                 }
                             }
                         }
                     }
+                    polja[pozicija.X, pozicija.Y].zauzeto = false;
+                    polja[p.X, p.Y].zauzeto = true;
+                    polja[p.X, p.Y].boja = boja;
                     pozicija = p;
+                    Pesak.anPasan = new Point(-1, -1);
+                    pomerioSe = true;
                     return true;
                 }
             }
@@ -637,210 +553,307 @@ namespace BoardGames
             pozicija = p;
         }
 
-        public override List<Point> MoguciPotezi(List<Figura> figure)
+        public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
             List<Point> potezi = new List<Point>();
             int x = pozicija.X - 1;
             int y = pozicija.Y - 1;
-                
-            while(x >= 0 && y >= 0)
+            //gore levo  
+            while (x >= 0 && y >= 0)
             {
-                foreach(var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if(figura.GetPozicija() == new Point(x, y))
-                    {
-                        if(figura.GetBoja() == boja)
-                        {
-                            goto l;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto l;
-                        }
-                    }
+                    potezi.Add(new Point(x, y));
+                    break;
                 }
                 potezi.Add(new Point(x, y));
                 x--;
                 y--;
             }
-            l:
+            //gore
             x = pozicija.X;
             y = pozicija.Y - 1;
             while (x >= 0 && y >= 0)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
-                    {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto l1;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto l1;
-                        }
-                    }
+                    potezi.Add(new Point(x, y));
+                    break;
                 }
                 potezi.Add(new Point(x, y));
                 y--;
             }
-            l1:
+
+            //gore desno
             x = pozicija.X + 1;
             y = pozicija.Y - 1;
             while (x <= 7 && y >= 0)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                y--;
+                x++;
+            }
+
+            //desno
+            x = pozicija.X + 1;
+            y = pozicija.Y;
+            while (x <= 7 && y <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x++;
+            }
+
+            //desno dole
+            x = pozicija.X + 1;
+            y = pozicija.Y + 1;
+            while (x <= 7 && y <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x++;
+                y++;
+            }
+
+            //dole
+            x = pozicija.X;
+            y = pozicija.Y + 1;
+            while (x <= 7 && y <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                y++;
+            }
+
+            //dole levo
+            x = pozicija.X - 1;
+            y = pozicija.Y + 1;
+            while (x >= 0 && y <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x--;
+                y++;
+            }
+
+            //levo
+            x = pozicija.X - 1;
+            y = pozicija.Y;
+            while (x >= 0 && y <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x--;
+            }
+
+            return potezi;
+        }
+
+        public override List<Point> MoguciPotezi(List<Figura> figure, ref PoljeInfo[,] polja)
+        {
+            List<Point> potezi = new List<Point>();
+            int x = pozicija.X - 1;
+            int y = pozicija.Y - 1;
+            //gore levo  
+            while(x >= 0 && y >= 0)
+            {
+                if(polja[x, y].zauzeto)
+                {
+                    if(polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto l2;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto l2;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
+                    }
+                }
+                potezi.Add(new Point(x, y));
+                x--;
+                y--;
+            }
+            //gore
+            x = pozicija.X;
+            y = pozicija.Y - 1;
+            while (x >= 0 && y >= 0)
+            {               
+                if (polja[x, y].zauzeto)
+                {
+                    if (polja[x, y].boja == boja)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
+                    }
+                }
+                potezi.Add(new Point(x, y));
+                y--;
+            }
+            
+            //gore desno
+            x = pozicija.X + 1;
+            y = pozicija.Y - 1;
+            while (x <= 7 && y >= 0)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    if (polja[x, y].boja == boja)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 y--;
                 x++;
             }
-            l2:
 
+            //desno
             x = pozicija.X + 1;
             y = pozicija.Y;
             while (x <= 7 && y <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto l3;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto l3;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x++;
             }
-            l3:
-
+            
+            //desno dole
             x = pozicija.X + 1;
             y = pozicija.Y + 1;
             while (x <= 7 && y <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto l4;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto l4;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x++;
                 y++;
             }
-            l4:
-
+            
+            //dole
             x = pozicija.X;
             y = pozicija.Y + 1;
             while (x <= 7 && y <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto l5;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto l5;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 y++;
             }
-            l5:
-
+            
+            //dole levo
             x = pozicija.X - 1;
             y = pozicija.Y + 1;
             while (x >= 0 && y <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto l6;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto l6;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x--;
                 y++;
             }
-            l6:
-
+      
+            //levo
             x = pozicija.X - 1;
             y = pozicija.Y;
             while (x >= 0 && y <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto l7;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto l7;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x--;
             }
-            l7:
 
             return potezi;
         }
 
-        public override bool OdigrajPotez(Point p, ref List<Figura> figure)
+        public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
         {
-            foreach (var x in this.MoguciPotezi(figure))
+            foreach (var x in this.MoguciPotezi(figure, ref polja))
             {
                 if (p == x)
                 {
@@ -859,7 +872,11 @@ namespace BoardGames
                     {
                         figure.RemoveAt(i);
                     }
+                    polja[pozicija.X, pozicija.Y].zauzeto = false;
+                    polja[p.X, p.Y].zauzeto = true;
+                    polja[p.X, p.Y].boja = boja;
                     pozicija = p;
+                    Pesak.anPasan = new Point(-1, -1);
                     return true;
                 }
             }
@@ -892,118 +909,175 @@ namespace BoardGames
             pozicija = p;
         }
 
-        public override List<Point> MoguciPotezi(List<Figura> figure)
+        public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
             List<Point> potezi = new List<Point>();
             int x = pozicija.X - 1;
             int y = pozicija.Y - 1;
 
+            //gore levo
             while (x >= 0 && y >= 0)
             {
                 foreach (var figura in figure)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].zauzeto)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto label3;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto label3;
-                        }
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x--;
                 y--;
             }
-            label3:
 
             x = pozicija.X + 1;
             y = pozicija.Y - 1;
-
+            //gore desno
             while (x <= 7 && y >= 0)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x++;
+                y--;
+            }
+
+            x = pozicija.X - 1;
+            y = pozicija.Y + 1;
+            //dole levo
+            while (x >= 0 && y <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x--;
+                y++;
+            }
+
+            x = pozicija.X + 1;
+            y = pozicija.Y + 1;
+            //dole desno
+            while (x <= 7 && y <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x++;
+                y++;
+            }
+            return potezi;
+        }
+
+        public override List<Point> MoguciPotezi(List<Figura> figure, ref PoljeInfo[,] polja)
+        {
+            List<Point> potezi = new List<Point>();
+            int x = pozicija.X - 1;
+            int y = pozicija.Y - 1;
+
+            //gore levo
+            while (x >= 0 && y >= 0)
             {
                 foreach (var figura in figure)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].zauzeto)
                     {
-                        if (figura.GetBoja() == boja)
+                        if (polja[x, y].boja == boja)
                         {
-                            goto label2;
+                            break;
                         }
                         else
                         {
                             potezi.Add(new Point(x, y));
-                            goto label2;
+                            break;
                         }
+                    }
+                }
+                potezi.Add(new Point(x, y));
+                x--;
+                y--;
+            }
+
+            x = pozicija.X + 1;
+            y = pozicija.Y - 1;
+            //gore desno
+            while (x <= 7 && y >= 0)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    if (polja[x, y].boja == boja)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x++;
                 y--;
             }
-            label2:
 
             x = pozicija.X - 1;
             y = pozicija.Y + 1;
-
+            //dole levo
             while (x >= 0 && y <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto label1;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto label1;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x--;
                 y++;
             }
-            label1:
 
             x = pozicija.X + 1;
             y = pozicija.Y + 1;
-
+            //dole desno
             while (x <= 7 && y <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto label;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto label;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x++;
                 y++;
             }
-            label:
             return potezi;
         }
 
-        public override bool OdigrajPotez(Point p, ref List<Figura> figure)
+        public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
         {
-            foreach (var x in this.MoguciPotezi(figure))
+            foreach (var x in this.MoguciPotezi(figure, ref polja))
             {
                 if (p == x)
                 {
@@ -1022,7 +1096,11 @@ namespace BoardGames
                     {
                         figure.RemoveAt(i);
                     }
+                    polja[pozicija.X, pozicija.Y].zauzeto = false;
+                    polja[p.X, p.Y].zauzeto = true;
+                    polja[p.X, p.Y].boja = boja;
                     pozicija = p;
+                    Pesak.anPasan = new Point(-1, -1);
                     return true;
                 }
             }
@@ -1054,114 +1132,159 @@ namespace BoardGames
             pozicija = p;
         }
 
-        public override List<Point> MoguciPotezi(List<Figura> figure)
+        public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
             List<Point> potezi = new List<Point>();
             int x = pozicija.X - 1;
             int y = pozicija.Y;
-
+            //levo
             while (x >= 0)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x--;
+            }
+
+            x = pozicija.X + 1;
+            y = pozicija.Y;
+            //desno
+            while (x <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                x++;
+            }
+
+            x = pozicija.X;
+            y = pozicija.Y + 1;
+            //dole
+            while (y <= 7)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                y++;
+            }
+
+            x = pozicija.X;
+            y = pozicija.Y - 1;
+            //gore
+            while (y >= 0)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    potezi.Add(new Point(x, y));
+                    break;
+                }
+                potezi.Add(new Point(x, y));
+                y--;
+            }
+            return potezi;
+        }
+
+        public override List<Point> MoguciPotezi(List<Figura> figure, ref PoljeInfo[,] polja)
+        {
+            List<Point> potezi = new List<Point>();
+            int x = pozicija.X - 1;
+            int y = pozicija.Y;
+            //levo
+            while (x >= 0)
+            {
+                if (polja[x, y].zauzeto)
+                {
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto lb;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto lb;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x--;
             }
-            lb:
 
             x = pozicija.X + 1;
             y = pozicija.Y;
-
+            //desno
             while (x <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto lb1;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto lb1;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 x++;
             }
-            lb1:
 
             x = pozicija.X;
             y = pozicija.Y + 1;
-
+            //dole
             while (y <= 7)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto lb2;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto lb2;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 y++;
             }
-            lb2:
 
             x = pozicija.X;
             y = pozicija.Y - 1;
-
+            //gore
             while (y >= 0)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (figura.GetPozicija() == new Point(x, y))
+                    if (polja[x, y].boja == boja)
                     {
-                        if (figura.GetBoja() == boja)
-                        {
-                            goto lb3;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            goto lb3;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
                 y--;
             }
-            lb3:
             return potezi;
         }
 
-        public override bool OdigrajPotez(Point p, ref List<Figura> figure)
+        public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
         {
-            foreach (var x in this.MoguciPotezi(figure))
+            foreach (var x in this.MoguciPotezi(figure, ref polja))
             {
                 if (p == x)
                 {
@@ -1180,7 +1303,11 @@ namespace BoardGames
                     {
                         figure.RemoveAt(i);
                     }
+                    polja[pozicija.X, pozicija.Y].zauzeto = false;
+                    polja[p.X, p.Y].zauzeto = true;
+                    polja[p.X, p.Y].boja = boja;
                     pozicija = p;
+                    Pesak.anPasan = new Point(-1, -1);
                     return true;
                 }
             }
@@ -1220,7 +1347,7 @@ namespace BoardGames
             return true;
         }
 
-        public override List<Point> MoguciPotezi(List<Figura> figure)
+        public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
             List<Point> potezi = new List<Point>();
 
@@ -1232,25 +1359,38 @@ namespace BoardGames
             {
                 if (InBound(x))
                 {
-                    bool pomoc = false;
-                    foreach (var y in figure)
+                    potezi.Add(x);
+                }
+            }
+            return potezi;
+        }
+
+        public override List<Point> MoguciPotezi(List<Figura> figure, ref PoljeInfo[,] polja)
+        {
+            List<Point> potezi = new List<Point>();
+
+            Point[] tacke = {new Point(this.pozicija.X - 2, this.pozicija.Y - 1), new Point(this.pozicija.X - 1, this.pozicija.Y - 2), new Point(this.pozicija.X + 1, this.pozicija.Y - 2),
+            new Point(this.pozicija.X + 2, this.pozicija.Y - 1), new Point(this.pozicija.X + 2, this.pozicija.Y + 1), new Point(this.pozicija.X + 1, this.pozicija.Y + 2),
+            new Point(this.pozicija.X - 1, this.pozicija.Y + 2), new Point(this.pozicija.X - 2, this.pozicija.Y + 1)};
+
+            foreach (var x in tacke)
+            {
+                if (InBound(x))
+                {
+                    if (polja[x.X, x.Y].zauzeto && boja == polja[x.X, x.Y].boja)
                     {
-                        if (y.GetPozicija() == x && boja == y.GetBoja())
-                        {
-                            pomoc = true;
-                            break;
-                        }
+                        ;
                     }
-                    if (!pomoc)
+                    else
                         potezi.Add(x);
                 }
             }
             return potezi;
         }
 
-        public override bool OdigrajPotez(Point p, ref List<Figura> figure)
+        public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
         {
-            foreach (var x in this.MoguciPotezi(figure))
+            foreach (var x in this.MoguciPotezi(figure, ref polja))
             {
                 if (p == x)
                 {
@@ -1269,6 +1409,10 @@ namespace BoardGames
                     {
                         figure.RemoveAt(i);
                     }
+                    Pesak.anPasan = new Point(-1, -1);
+                    polja[pozicija.X, pozicija.Y].zauzeto = false;
+                    polja[p.X, p.Y].zauzeto = true;
+                    polja[p.X, p.Y].boja = boja;
                     pozicija = p;
                     return true;
                 }
@@ -1281,6 +1425,7 @@ namespace BoardGames
     public class Pesak : Figura
     {
         Image slika;
+        public static Point anPasan = new Point(-1, -1);
 
         public Pesak(Point pozicija, Boja boja, Image slika) : base(pozicija, boja)
         {
@@ -1302,59 +1447,60 @@ namespace BoardGames
             pozicija = p;
         }
 
-        public override List<Point> MoguciPotezi(List<Figura> figure)
+        private bool InBound(Point p)
+        {
+            if (p.X < 0 || p.X > 7 || p.Y < 0 || p.Y > 7)
+                return false;
+            return true;
+        }
+
+        public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
+        {
+            List<Point> potezi = new List<Point>();
+            if (boja == Boja.bela)
+            {
+                potezi.Add(new Point(pozicija.X - 1, pozicija.Y - 1));
+                potezi.Add(new Point(pozicija.X + 1, pozicija.Y - 1));
+            }
+            else
+            {
+                potezi.Add(new Point(pozicija.X - 1, pozicija.Y + 1));
+                potezi.Add(new Point(pozicija.X + 1, pozicija.Y + 1));
+            }
+            return potezi;
+        }
+
+        public override List<Point> MoguciPotezi(List<Figura> figure, ref PoljeInfo[,] polja)
         {
             List<Point> potezi = new List<Point>();
 
-            bool ispred = false;
-
             if(boja == Boja.crna)
             {
-                foreach (var x in figure)
-                {
-                    if (x.GetPozicija() == new Point(pozicija.X, pozicija.Y + 1))
-                        ispred = true;
-                    if (x.GetPozicija() == new Point(pozicija.X + 1, pozicija.Y + 1) && x.GetBoja() != boja)
-                        potezi.Add(new Point(pozicija.X + 1, pozicija.Y + 1));
-                    if(x.GetPozicija() == new Point(pozicija.X - 1, pozicija.Y + 1) && x.GetBoja() != boja)
-                        potezi.Add(new Point(pozicija.X - 1, pozicija.Y + 1));
-                }
-
-                if (!ispred)
+                if (!polja[pozicija.X, pozicija.Y+1].zauzeto)
                     potezi.Add(new Point(pozicija.X, pozicija.Y + 1));
+                if (InBound(new Point(pozicija.X + 1, pozicija.Y + 1)) && polja[pozicija.X + 1, pozicija.Y + 1].zauzeto && polja[pozicija.X + 1, pozicija.Y + 1].boja != boja)
+                    potezi.Add(new Point(pozicija.X + 1, pozicija.Y + 1));
+                if(InBound(new Point(pozicija.X - 1, pozicija.Y + 1)) && polja[pozicija.X - 1, pozicija.Y + 1].zauzeto && polja[pozicija.X - 1, pozicija.Y + 1].boja != boja)
+                    potezi.Add(new Point(pozicija.X - 1, pozicija.Y + 1));
             }
 
 
             else
             {
-                foreach (var x in figure)
-                {
-                    if (x.GetPozicija() == new Point(pozicija.X, pozicija.Y - 1))
-                        ispred = true;
-                    if (x.GetPozicija() == new Point(pozicija.X + 1, pozicija.Y - 1) && x.GetBoja() != boja)
-                        potezi.Add(new Point(pozicija.X + 1, pozicija.Y - 1));
-                    if (x.GetPozicija() == new Point(pozicija.X - 1, pozicija.Y - 1) && x.GetBoja() != boja)
-                        potezi.Add(new Point(pozicija.X - 1, pozicija.Y - 1));
-                }
-
-                if (!ispred)
+                if (!polja[pozicija.X, pozicija.Y - 1].zauzeto)
                     potezi.Add(new Point(pozicija.X, pozicija.Y - 1));
+                if (InBound(new Point(pozicija.X + 1, pozicija.Y - 1)) && polja[pozicija.X + 1, pozicija.Y - 1].zauzeto && polja[pozicija.X + 1, pozicija.Y - 1].boja != boja)
+                    potezi.Add(new Point(pozicija.X + 1, pozicija.Y - 1));
+                if (InBound(new Point(pozicija.X - 1, pozicija.Y - 1)) && polja[pozicija.X - 1, pozicija.Y - 1].zauzeto && polja[pozicija.X - 1, pozicija.Y - 1].boja != boja)
+                    potezi.Add(new Point(pozicija.X - 1, pozicija.Y - 1));                 
             }
 
             //ako je pesak na pocetku pa moze 2 poteza unapred da odigra
-            ispred = false;
             if(boja == Boja.bela)
             {
                 if(pozicija.Y == 6)
                 {
-                    foreach (var x in figure)
-                    {
-                        if (x.GetPozicija() == new Point(pozicija.X, pozicija.Y - 1))
-                            ispred = true;
-                        if (x.GetPozicija() == new Point(pozicija.X, pozicija.Y - 2))
-                            ispred = true;
-                    }
-                    if (!ispred)
+                    if (!polja[pozicija.X, pozicija.Y - 1].zauzeto && !polja[pozicija.X, pozicija.Y - 2].zauzeto)
                         potezi.Add(new Point(pozicija.X, pozicija.Y - 2));
                 }
             }
@@ -1363,33 +1509,58 @@ namespace BoardGames
             {
                 if (pozicija.Y == 1)
                 {
-                    foreach (var x in figure)
-                    {
-                        if (x.GetPozicija() == new Point(pozicija.X, pozicija.Y + 1))
-                            ispred = true;
-                        if (x.GetPozicija() == new Point(pozicija.X, pozicija.Y + 2))
-                            ispred = true;
-                    }
-                    if (!ispred)
+                    if (!polja[pozicija.X, pozicija.Y + 1].zauzeto && !polja[pozicija.X, pozicija.Y + 2].zauzeto)
                         potezi.Add(new Point(pozicija.X, pozicija.Y + 2));
                 }
             }
 
-            if(pozicija.Y == 3 && boja == Boja.bela)
+            //an pasan
+            if(anPasan.X != -1)
             {
-
+                if(pozicija.Y == 3 && anPasan.Y == 3)
+                {
+                    if(Math.Abs(pozicija.X - anPasan.X) == 1 && !polja[anPasan.X, anPasan.Y - 1].zauzeto)
+                    {
+                        potezi.Add(new Point(anPasan.X, anPasan.Y - 1));
+                    }
+                }
+                else if(pozicija.Y == 4 && anPasan.Y == 4)
+                {
+                    if (Math.Abs(pozicija.X - anPasan.X) == 1 && !polja[anPasan.X, anPasan.Y + 1].zauzeto)
+                    {
+                        potezi.Add(new Point(anPasan.X, anPasan.Y + 1));
+                    }
+                }
             }
 
             return potezi;
         }
 
-        public override bool OdigrajPotez(Point p, ref List<Figura> figure)
+        public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
         {
-            foreach (var x in this.MoguciPotezi(figure))
+            foreach (var x in this.MoguciPotezi(figure, ref polja))
             {
                 //da li je moguc potez
                 if (p == x)
                 {
+                    if (Math.Abs(pozicija.X - p.X) > 0 && !polja[p.X, p.Y].zauzeto)
+                    {
+                        int j = 0;
+                        bool pojeo1 = false;
+                        foreach (var figura in figure)
+                        {
+                            if (figura.GetPozicija() == anPasan)
+                            {
+                                pojeo1 = true;
+                                break;
+                            }
+                            j++;
+                        }
+                        if (pojeo1)
+                        {
+                            figure.RemoveAt(j);
+                        }
+                    }
                     int i = 0;
                     bool pojeo = false;
                     foreach(var figura in figure)
@@ -1405,12 +1576,19 @@ namespace BoardGames
                     {
                         figure.RemoveAt(i);
                     }
-                    pozicija = p;
-                    /*
-                    if(pozicija.Y == 0 || pozicija.Y == 7)
+                    
+                    if(Math.Abs(pozicija.Y - p.Y) > 1)
                     {
-                        return false;
-                    }*/
+                        anPasan = p;
+                    }
+                    else
+                    {
+                        anPasan = new Point(-1, -1);
+                    }
+                    polja[pozicija.X, pozicija.Y].zauzeto = false;
+                    polja[p.X, p.Y].zauzeto = true;
+                    polja[p.X, p.Y].boja = boja;
+                    pozicija = p;
                     return true;
                 }
             }
