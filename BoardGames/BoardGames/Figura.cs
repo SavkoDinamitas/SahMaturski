@@ -94,6 +94,31 @@ namespace BoardGames
             return true;
         }
 
+        public bool Sah(Boja b, ref List<Figura> ecovece, ref PoljeInfo[,] mast)
+        {
+            Point pozicijaKralja = new Point(1, 1);
+            foreach (var x in ecovece)
+            {
+                if (x.GetBoja() == b && x.Vrsta == "kralj")
+                {
+                    pozicijaKralja = x.GetPozicija();
+                }
+            }
+
+            foreach (var x in ecovece)
+            {
+                if (x.GetBoja() != b)
+                {
+                    foreach (var p in x.NapadnutaPolja(ecovece, ref mast))
+                    {
+                        if (p == pozicijaKralja)
+                            return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
             List<Point> potezi = new List<Point>();
@@ -144,7 +169,7 @@ namespace BoardGames
             //mala rokada belog kralja
             List<Point> wtf;
 
-            if (boja == Boja.bela && !pomerioSe)
+            if (boja == Boja.bela && !pomerioSe  && !Sah(Boja.bela, ref figure, ref polja))
             {
                 if (pozicija.X == 4 && pozicija.Y == 7)
                 {
@@ -222,7 +247,7 @@ namespace BoardGames
             }
 
             //mala rokada crnog kralja
-            else if(!pomerioSe)
+            else if(!pomerioSe && !Sah(Boja.crna, ref figure, ref polja))
             {
                 if (pozicija.X == 4 && pozicija.Y == 0)
                 {
@@ -299,7 +324,7 @@ namespace BoardGames
             }
 
             //velika rokada belog kralja
-            if (boja == Boja.bela && !pomerioSe)
+            if (boja == Boja.bela && !pomerioSe && !Sah(Boja.bela, ref figure, ref polja))
             {
                 if (pozicija.X == 4 && pozicija.Y == 7)
                 {
@@ -378,7 +403,7 @@ namespace BoardGames
             }
 
             //velika rokada crnog kralja
-            else if(!pomerioSe)
+            else if(!pomerioSe && !Sah(Boja.crna, ref figure, ref polja))
             {
                 if (pozicija.X == 4 && pozicija.Y == 0)
                 {
@@ -1558,6 +1583,7 @@ namespace BoardGames
                         }
                         if (pojeo1)
                         {
+                            polja[anPasan.X, anPasan.Y].zauzeto = false;
                             figure.RemoveAt(j);
                         }
                     }
