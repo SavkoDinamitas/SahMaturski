@@ -94,7 +94,53 @@ namespace BoardGames
             return true;
         }
 
-        public bool Sah(Boja b, ref List<Figura> ecovece, ref PoljeInfo[,] mast)
+        public static PoljeInfo[,] KopiranjePolja(ref PoljeInfo[,] komedija)
+        {
+            PoljeInfo[,] kopija = new PoljeInfo[8, 8];
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    PoljeInfo dz;
+                    dz.zauzeto = komedija[i, j].zauzeto;
+                    dz.boja = komedija[i, j].boja;
+                    kopija[i, j] = dz;
+                }
+            }
+            return kopija;
+        }
+
+        public static List<Figura> KopiranjeListe(ref List<Figura> xd)
+        {
+            List<Figura> kopija = new List<Figura>();
+            foreach (var x in xd)
+            {
+                switch (x.Vrsta)
+                {
+                    case "kralj":
+                        kopija.Add(new Kralj(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "dama":
+                        kopija.Add(new Dama(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "top":
+                        kopija.Add(new Top(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "lovac":
+                        kopija.Add(new Lovac(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "skakac":
+                        kopija.Add(new Skakac(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "pesak":
+                        kopija.Add(new Pesak(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                }
+            }
+            return kopija;
+        }
+
+        public static bool Sah(Boja b, ref List<Figura> ecovece, ref PoljeInfo[,] mast)
         {
             Point pozicijaKralja = new Point(1, 1);
             foreach (var x in ecovece)
@@ -454,6 +500,11 @@ namespace BoardGames
                 }
             }
             
+            foreach(var x in potezi)
+            {
+
+            }
+
             return potezi;
         }
 
@@ -576,6 +627,31 @@ namespace BoardGames
         public override void SetPozicija(Point p)
         {
             pozicija = p;
+        }
+
+        public bool Sah(Boja b, ref List<Figura> ecovece, ref PoljeInfo[,] mast)
+        {
+            Point pozicijaKralja = new Point(1, 1);
+            foreach (var x in ecovece)
+            {
+                if (x.GetBoja() == b && x.Vrsta == "kralj")
+                {
+                    pozicijaKralja = x.GetPozicija();
+                }
+            }
+
+            foreach (var x in ecovece)
+            {
+                if (x.GetBoja() != b)
+                {
+                    foreach (var p in x.NapadnutaPolja(ecovece, ref mast))
+                    {
+                        if (p == pozicijaKralja)
+                            return true;
+                    }
+                }
+            }
+            return false;
         }
 
         public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
@@ -872,6 +948,50 @@ namespace BoardGames
                 potezi.Add(new Point(x, y));
                 x--;
             }
+            
+            /*List<Point> potezi1 = new List<Point>();
+            foreach(var p in potezi)
+            {
+                int i = 0;
+                bool pojeo = false;
+                Point pomoc = pozicija;
+                foreach (var figura in figure)
+                {
+                    if (figura.GetPozicija() == p)
+                    {
+                        pojeo = true;
+                        break;
+                    }
+                    i++;
+                }
+                Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                if (pojeo)
+                {
+                    pojedena = figure[i];
+                    figure.RemoveAt(i);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                polja[p.X, p.Y].zauzeto = true;
+                polja[p.X, p.Y].boja = boja;
+                pozicija = p;
+                if(!Sah(boja, ref figure, ref polja))
+                {
+                    potezi1.Add(p);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                if (pojeo)
+                {
+                    polja[pozicija.X, pozicija.Y].zauzeto = true;
+
+                }
+                polja[pomoc.X, pomoc.Y].zauzeto = true;
+                this.pozicija = pomoc;
+                if (pojeo)
+                {
+                    figure.Add(pojedena);
+
+                }
+            }*/
 
             return potezi;
         }
@@ -1012,19 +1132,16 @@ namespace BoardGames
             //gore levo
             while (x >= 0 && y >= 0)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (polja[x, y].zauzeto)
+                    if (polja[x, y].boja == boja)
                     {
-                        if (polja[x, y].boja == boja)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            potezi.Add(new Point(x, y));
-                            break;
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        potezi.Add(new Point(x, y));
+                        break;
                     }
                 }
                 potezi.Add(new Point(x, y));
