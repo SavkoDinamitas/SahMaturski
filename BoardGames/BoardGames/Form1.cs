@@ -431,7 +431,7 @@ namespace BoardGames
 
                         if (odigraj)
                         {
-                            if (Sah(Boja.bela, ref figure, ref polja))
+                            /*if (Sah(Boja.bela, ref figure, ref polja))
                             {
                                 MessageBox.Show("Sah Vam je");
                                 selektovanje = true;
@@ -450,7 +450,7 @@ namespace BoardGames
                                 }
                             }
                             else
-                            {
+                            {*/
                                 tabla[pomoc.X, pomoc.Y].Image = null;
                                 //polja[pomoc.X, pomoc.Y].zauzeto = false;
                                 tabla[i, j].Image = potez.GetImage();
@@ -493,7 +493,7 @@ namespace BoardGames
                                         }
                                     }
                                 }*/
-                            }
+                            //}
 
                             if(PesakNaKraju(ref figure) != -1)
                             {
@@ -561,7 +561,7 @@ namespace BoardGames
 
                         if (odigraj)
                         {
-                            if (Sah(Boja.crna, ref figure, ref polja))
+                            /*if (Sah(Boja.crna, ref figure, ref polja))
                             {
                                 MessageBox.Show("Sah Vam je");
                                 selektovanje = true;
@@ -578,7 +578,7 @@ namespace BoardGames
                                 }
                             }
                             else
-                            {
+                            {*/
                                 tabla[pomoc.X, pomoc.Y].Image = null;
                                 //polja[pomoc.X, pomoc.Y].zauzeto = false;
                                 tabla[i, j].Image = potez.GetImage();
@@ -621,7 +621,7 @@ namespace BoardGames
                                         }
                                     }
                                 }*/
-                            }
+                            //}
 
                             if (PesakNaKraju(ref figure) != -1)
                             {
