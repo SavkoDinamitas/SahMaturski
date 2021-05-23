@@ -389,6 +389,12 @@ namespace BoardGames
                             break;
                         }
 
+                        if(x.GetPozicija() == new Point(1, 7))
+                        {
+                            prazno = false;
+                            break;
+                        }
+
                         if(boja != x.GetBoja())
                         {
                             if (x.Vrsta == "kralj")
@@ -463,6 +469,12 @@ namespace BoardGames
                         }
 
                         if (x.GetPozicija() == new Point(2, 0))
+                        {
+                            prazno = false;
+                            break;
+                        }
+
+                        if (x.GetPozicija() == new Point(1, 0))
                         {
                             prazno = false;
                             break;
@@ -949,7 +961,7 @@ namespace BoardGames
                 x--;
             }
             
-            /*List<Point> potezi1 = new List<Point>();
+            List<Point> potezi1 = new List<Point>();
             foreach(var p in potezi)
             {
                 int i = 0;
@@ -982,18 +994,19 @@ namespace BoardGames
                 if (pojeo)
                 {
                     polja[pozicija.X, pozicija.Y].zauzeto = true;
-
+                    polja[pozicija.X, pozicija.Y].boja = pojedena.GetBoja();
                 }
                 polja[pomoc.X, pomoc.Y].zauzeto = true;
+                polja[pomoc.X, pomoc.Y].boja = boja;
                 this.pozicija = pomoc;
                 if (pojeo)
                 {
-                    figure.Add(pojedena);
+                    figure.Insert(i, pojedena);
 
                 }
-            }*/
+            }
 
-            return potezi;
+            return potezi1;
         }
 
         public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
@@ -1063,13 +1076,10 @@ namespace BoardGames
             //gore levo
             while (x >= 0 && y >= 0)
             {
-                foreach (var figura in figure)
+                if (polja[x, y].zauzeto)
                 {
-                    if (polja[x, y].zauzeto)
-                    {
-                        potezi.Add(new Point(x, y));
-                        break;
-                    }
+                    potezi.Add(new Point(x, y));
+                    break;
                 }
                 potezi.Add(new Point(x, y));
                 x--;
@@ -1214,7 +1224,52 @@ namespace BoardGames
                 x++;
                 y++;
             }
-            return potezi;
+            List<Point> potezi1 = new List<Point>();
+            foreach (var p in potezi)
+            {
+                int i = 0;
+                bool pojeo = false;
+                Point pomoc = pozicija;
+                foreach (var figura in figure)
+                {
+                    if (figura.GetPozicija() == p)
+                    {
+                        pojeo = true;
+                        break;
+                    }
+                    i++;
+                }
+                Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                if (pojeo)
+                {
+                    pojedena = figure[i];
+                    figure.RemoveAt(i);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                polja[p.X, p.Y].zauzeto = true;
+                polja[p.X, p.Y].boja = boja;
+                pozicija = p;
+                if (!Kralj.Sah(boja, ref figure, ref polja))
+                {
+                    potezi1.Add(p);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                if (pojeo)
+                {
+                    polja[pozicija.X, pozicija.Y].zauzeto = true;
+                    polja[pozicija.X, pozicija.Y].boja = pojedena.GetBoja();
+                }
+                polja[pomoc.X, pomoc.Y].zauzeto = true;
+                polja[pomoc.X, pomoc.Y].boja = boja;
+                this.pozicija = pomoc;
+                if (pojeo)
+                {
+                    figure.Insert(i, pojedena);
+
+                }
+            }
+
+            return potezi1;
         }
 
         public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
@@ -1421,7 +1476,52 @@ namespace BoardGames
                 potezi.Add(new Point(x, y));
                 y--;
             }
-            return potezi;
+            List<Point> potezi1 = new List<Point>();
+            foreach (var p in potezi)
+            {
+                int i = 0;
+                bool pojeo = false;
+                Point pomoc = pozicija;
+                foreach (var figura in figure)
+                {
+                    if (figura.GetPozicija() == p)
+                    {
+                        pojeo = true;
+                        break;
+                    }
+                    i++;
+                }
+                Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                if (pojeo)
+                {
+                    pojedena = figure[i];
+                    figure.RemoveAt(i);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                polja[p.X, p.Y].zauzeto = true;
+                polja[p.X, p.Y].boja = boja;
+                pozicija = p;
+                if (!Kralj.Sah(boja, ref figure, ref polja))
+                {
+                    potezi1.Add(p);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                if (pojeo)
+                {
+                    polja[pozicija.X, pozicija.Y].zauzeto = true;
+                    polja[pozicija.X, pozicija.Y].boja = pojedena.GetBoja();
+                }
+                polja[pomoc.X, pomoc.Y].zauzeto = true;
+                polja[pomoc.X, pomoc.Y].boja = boja;
+                this.pozicija = pomoc;
+                if (pojeo)
+                {
+                    figure.Insert(i, pojedena);
+
+                }
+            }
+
+            return potezi1;
         }
 
         public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
@@ -1527,7 +1627,52 @@ namespace BoardGames
                         potezi.Add(x);
                 }
             }
-            return potezi;
+            List<Point> potezi1 = new List<Point>();
+            foreach (var p in potezi)
+            {
+                int i = 0;
+                bool pojeo = false;
+                Point pomoc = pozicija;
+                foreach (var figura in figure)
+                {
+                    if (figura.GetPozicija() == p)
+                    {
+                        pojeo = true;
+                        break;
+                    }
+                    i++;
+                }
+                Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                if (pojeo)
+                {
+                    pojedena = figure[i];
+                    figure.RemoveAt(i);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                polja[p.X, p.Y].zauzeto = true;
+                polja[p.X, p.Y].boja = boja;
+                pozicija = p;
+                if (!Kralj.Sah(boja, ref figure, ref polja))
+                {
+                    potezi1.Add(p);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                if (pojeo)
+                {
+                    polja[pozicija.X, pozicija.Y].zauzeto = true;
+                    polja[pozicija.X, pozicija.Y].boja = pojedena.GetBoja();
+                }
+                polja[pomoc.X, pomoc.Y].zauzeto = true;
+                polja[pomoc.X, pomoc.Y].boja = boja;
+                this.pozicija = pomoc;
+                if (pojeo)
+                {
+                    figure.Insert(i, pojedena);
+
+                }
+            }
+
+            return potezi1;
         }
 
         public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)
@@ -1675,7 +1820,52 @@ namespace BoardGames
                 }
             }
 
-            return potezi;
+            List<Point> potezi1 = new List<Point>();
+            foreach (var p in potezi)
+            {
+                int i = 0;
+                bool pojeo = false;
+                Point pomoc = pozicija;
+                foreach (var figura in figure)
+                {
+                    if (figura.GetPozicija() == p)
+                    {
+                        pojeo = true;
+                        break;
+                    }
+                    i++;
+                }
+                Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                if (pojeo)
+                {
+                    pojedena = figure[i];
+                    figure.RemoveAt(i);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                polja[p.X, p.Y].zauzeto = true;
+                polja[p.X, p.Y].boja = boja;
+                pozicija = p;
+                if (!Kralj.Sah(boja, ref figure, ref polja))
+                {
+                    potezi1.Add(p);
+                }
+                polja[pozicija.X, pozicija.Y].zauzeto = false;
+                if (pojeo)
+                {
+                    polja[pozicija.X, pozicija.Y].zauzeto = true;
+                    polja[pozicija.X, pozicija.Y].boja = pojedena.GetBoja();
+                }
+                polja[pomoc.X, pomoc.Y].zauzeto = true;
+                polja[pomoc.X, pomoc.Y].boja = boja;
+                this.pozicija = pomoc;
+                if (pojeo)
+                {
+                    figure.Insert(i, pojedena);
+
+                }
+            }
+
+            return potezi1;
         }
 
         public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)

@@ -279,7 +279,8 @@ namespace BoardGames
 
         private bool Mat(Boja b, ref List<Figura> ecovece)
         {
-
+            ecovece = KopiranjeListe(ref figure);
+            /*
             List<Figura> kopija = KopiranjeListe(ref ecovece);
             PoljeInfo[,] xd = KopiranjePolja(ref polja);
             for(int i = 0; i < kopija.Count; i++)
@@ -316,6 +317,14 @@ namespace BoardGames
                     }
                 }
             }  
+            return true;*/
+            foreach(var figura in ecovece)
+            {
+                if (figura.GetBoja() == b && figura.MoguciPotezi(figure, ref polja).Count > 0)
+                {
+                    return false;
+                }                
+            }
             return true;
         }
 
@@ -447,7 +456,7 @@ namespace BoardGames
                                 tabla[i, j].Image = potez.GetImage();
                                 //polja[i, j].zauzeto = true;
                                 //polja[i, j].boja = potez.GetBoja();
-                                this.Text = potez.GetPozicija().ToString();
+                                //this.Text = potez.GetPozicija().ToString();
                                 selektovanje = true;
                                 beliIgra = false;
                                 CrtajTablu(ref figure);
@@ -573,7 +582,7 @@ namespace BoardGames
                                 tabla[pomoc.X, pomoc.Y].Image = null;
                                 //polja[pomoc.X, pomoc.Y].zauzeto = false;
                                 tabla[i, j].Image = potez.GetImage();
-                                this.Text = potez.GetPozicija().ToString();
+                                //this.Text = potez.GetPozicija().ToString();
                                 //polja[i, j].zauzeto = true;
                                 //polja[i, j].boja = potez.GetBoja();
                                 selektovanje = true;
@@ -632,7 +641,6 @@ namespace BoardGames
                                 pictureBox3.Visible = true;
                                 pictureBox4.Visible = true;
                             }
-
                             List<Figura> kopija = KopiranjeListe(ref figure);
                             if (Mat(Boja.bela, ref kopija) && Sah(Boja.bela, ref kopija, ref polja))
                             {
@@ -687,6 +695,30 @@ namespace BoardGames
                     tabla[k, h].Enabled = true;
                 }
             }
+
+            List<Figura> kopija = KopiranjeListe(ref figure);
+            if (Mat(Boja.bela, ref kopija) && Sah(Boja.bela, ref kopija, ref polja))
+            {
+                MessageBox.Show("Crni je pobedio");
+                matic = true;
+            }
+            else if (Mat(Boja.bela, ref kopija))
+            {
+                MessageBox.Show("Pat");
+                matic = true;
+            }
+            
+            kopija = KopiranjeListe(ref figure);
+            if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
+            {
+                MessageBox.Show("Beli je pobedio");
+                matic = true;
+            }
+            else if (Mat(Boja.crna, ref kopija))
+            {
+                MessageBox.Show("Pat");
+            }
+
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
@@ -720,6 +752,29 @@ namespace BoardGames
                 {
                     tabla[k, h].Enabled = true;
                 }
+            }
+
+            List<Figura> kopija = KopiranjeListe(ref figure);
+            if (Mat(Boja.bela, ref kopija) && Sah(Boja.bela, ref kopija, ref polja))
+            {
+                MessageBox.Show("Crni je pobedio");
+                matic = true;
+            }
+            else if (Mat(Boja.bela, ref kopija))
+            {
+                MessageBox.Show("Pat");
+                matic = true;
+            }
+
+            kopija = KopiranjeListe(ref figure);
+            if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
+            {
+                MessageBox.Show("Beli je pobedio");
+                matic = true;
+            }
+            else if (Mat(Boja.crna, ref kopija))
+            {
+                MessageBox.Show("Pat");
             }
         }
 
@@ -755,6 +810,29 @@ namespace BoardGames
                     tabla[k, h].Enabled = true;
                 }
             }
+
+            List<Figura> kopija = KopiranjeListe(ref figure);
+            if (Mat(Boja.bela, ref kopija) && Sah(Boja.bela, ref kopija, ref polja))
+            {
+                MessageBox.Show("Crni je pobedio");
+                matic = true;
+            }
+            else if (Mat(Boja.bela, ref kopija))
+            {
+                MessageBox.Show("Pat");
+                matic = true;
+            }
+
+            kopija = KopiranjeListe(ref figure);
+            if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
+            {
+                MessageBox.Show("Beli je pobedio");
+                matic = true;
+            }
+            else if (Mat(Boja.crna, ref kopija))
+            {
+                MessageBox.Show("Pat");
+            }
         }
 
         private void pictureBox4_Click(object sender, EventArgs e)
@@ -788,6 +866,29 @@ namespace BoardGames
                 {
                     tabla[k, h].Enabled = true;
                 }
+            }
+
+            List<Figura> kopija = KopiranjeListe(ref figure);
+            if (Mat(Boja.bela, ref kopija) && Sah(Boja.bela, ref kopija, ref polja))
+            {
+                MessageBox.Show("Crni je pobedio");
+                matic = true;
+            }
+            else if (Mat(Boja.bela, ref kopija))
+            {
+                MessageBox.Show("Pat");
+                matic = true;
+            }
+
+            kopija = KopiranjeListe(ref figure);
+            if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
+            {
+                MessageBox.Show("Beli je pobedio");
+                matic = true;
+            }
+            else if (Mat(Boja.crna, ref kopija))
+            {
+                MessageBox.Show("Pat");
             }
         }
     }
