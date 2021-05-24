@@ -397,7 +397,7 @@ namespace BoardGames
         bool matic = false;
         private void KlikNaPolje(object sender, EventArgs e)
         {
-            if (!matic)
+            if (!matic && !backgroundWorker1.IsBusy)
             {
                 string s = (sender as PictureBox).Tag.ToString();
                 string[] unos = s.Split(',');
@@ -432,69 +432,11 @@ namespace BoardGames
 
                         if (odigraj)
                         {
-                            /*if (Sah(Boja.bela, ref figure, ref polja))
-                            {
-                                MessageBox.Show("Sah Vam je");
-                                selektovanje = true;
-                                polja[potez.GetPozicija().X, potez.GetPozicija().Y].zauzeto = false;
-                                if (index != -1)
-                                {
-                                    polja[potez.GetPozicija().X, potez.GetPozicija().Y].zauzeto = true;
-
-                                }
-                                polja[pomoc.X, pomoc.Y].zauzeto = true;
-                                potez.SetPozicija(pomoc);
-                                if (index != -1)
-                                {
-                                    figure.Add(pojedena);
-
-                                }
-                            }
-                            else
-                            {*/
-                                tabla[pomoc.X, pomoc.Y].Image = null;
-                                //polja[pomoc.X, pomoc.Y].zauzeto = false;
-                                tabla[i, j].Image = potez.GetImage();
-                                //polja[i, j].zauzeto = true;
-                                //polja[i, j].boja = potez.GetBoja();
-                                //this.Text = potez.GetPozicija().ToString();
-                                selektovanje = true;
-                                beliIgra = false;
-                                CrtajTablu(ref figure);
-                                /*
-                                if (potez.Vrsta == "kralj")
-                                {
-                                    if (Math.Abs(pomoc.X - potez.GetPozicija().X) > 1)
-                                    {
-                                        if (potez.GetBoja() == Boja.bela)
-                                        {
-                                            if (pomoc.X - potez.GetPozicija().X > 0)
-                                            {
-                                                tabla[0, 7].Image = null;
-                                                tabla[3, 7].Image = Image.FromFile("Beli top.png");
-                                            }
-                                            else
-                                            {
-                                                tabla[7, 7].Image = null;
-                                                tabla[5, 7].Image = Image.FromFile("Beli top.png");
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (pomoc.X - potez.GetPozicija().X > 0)
-                                            {
-                                                tabla[0, 0].Image = null;
-                                                tabla[3, 0].Image = Image.FromFile("Crni top.png");
-                                            }
-                                            else
-                                            {
-                                                tabla[7, 0].Image = null;
-                                                tabla[5, 0].Image = Image.FromFile("Crni top.png");
-                                            }
-                                        }
-                                    }
-                                }*/
-                            //}
+                            tabla[pomoc.X, pomoc.Y].Image = null;
+                            tabla[i, j].Image = potez.GetImage();
+                            selektovanje = true;
+                            beliIgra = false;
+                            CrtajTablu(ref figure);
 
                             if(PesakNaKraju(ref figure) != -1)
                             {
@@ -534,142 +476,10 @@ namespace BoardGames
                     }
                 }
 
-                else
+                if(!beliIgra)
                 {
-
-
-                    /*
-                    if (selektovanje)
-                    {
-                        int figpoz = NadjiFiguru(new Point(i, j));
-                        this.Text = i.ToString() + " " + j.ToString();
-                        if (figpoz != -1 && figure[figpoz].GetBoja() == Boja.crna)
-                        {
-                            ObojiMogucaPolja(figure[figpoz].MoguciPotezi(figure, ref polja));
-                            tabla[i, j].BackColor = Color.LightBlue;
-                            selektovanje = false;
-                            potez = figure[figpoz];
-                        }
-                    }*/
-                    /*else
-                    {*/
-
                     //poziv engina
-                    long nebitno;
-                    Point gde;
-                    Point igram;
-                    (nebitno, gde, igram) = AI.Game(ref figure, ref polja, 3, Boja.crna);
-                    int cimeigram = NadjiFiguru(igram);
-                    potez = figure[cimeigram];
-                    ObojTablu();
-                        int index = NadjiFiguru(gde);
-                        Figura pojedena = figure[0];
-                        if (index != -1)
-                        {
-                            pojedena = figure[index];
-                        }
-                        Point pomoc = potez.GetPozicija();
-                        bool odigraj = potez.OdigrajPotez(gde, ref figure, ref polja);
-
-                        if (odigraj)
-                        {
-                            /*if (Sah(Boja.crna, ref figure, ref polja))
-                            {
-                                MessageBox.Show("Sah Vam je");
-                                selektovanje = true;
-                                polja[potez.GetPozicija().X, potez.GetPozicija().Y].zauzeto = false;
-                                if (index != -1)
-                                {
-                                    polja[potez.GetPozicija().X, potez.GetPozicija().Y].zauzeto = true;
-                                }
-                                polja[pomoc.X, pomoc.Y].zauzeto = true;
-                                potez.SetPozicija(pomoc);
-                                if (index != -1)
-                                {
-                                    figure.Add(pojedena);
-                                }
-                            }
-                            else
-                            {*/
-                                tabla[pomoc.X, pomoc.Y].Image = null;
-                                //polja[pomoc.X, pomoc.Y].zauzeto = false;
-                                tabla[i, j].Image = potez.GetImage();
-                                //this.Text = potez.GetPozicija().ToString();
-                                //polja[i, j].zauzeto = true;
-                                //polja[i, j].boja = potez.GetBoja();
-                                selektovanje = true;
-                                beliIgra = true;
-                                CrtajTablu(ref figure);
-                                /*
-                                if (potez.Vrsta == "kralj")
-                                {
-                                    if (Math.Abs(pomoc.X - potez.GetPozicija().X) > 1)
-                                    {
-                                        if (potez.GetBoja() == Boja.bela)
-                                        {
-                                            if (pomoc.X - potez.GetPozicija().X > 0)
-                                            {
-                                                tabla[0, 7].Image = null;
-                                                tabla[3, 7].Image = Image.FromFile("Beli top.png");
-                                            }
-                                            else
-                                            {
-                                                tabla[7, 7].Image = null;
-                                                tabla[5, 7].Image = Image.FromFile("Beli top.png");
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (pomoc.X - potez.GetPozicija().X > 0)
-                                            {
-                                                tabla[0, 0].Image = null;
-                                                tabla[3, 0].Image = Image.FromFile("Crni top.png");
-                                            }
-                                            else
-                                            {
-                                                tabla[7, 0].Image = null;
-                                                tabla[5, 0].Image = Image.FromFile("Crni top.png");
-                                            }
-                                        }
-                                    }
-                                }*/
-                            //}
-
-                            if (PesakNaKraju(ref figure) != -1)
-                            {
-                                for (int k = 0; k < 8; k++)
-                                {
-                                    for (int h = 0; h < 8; h++)
-                                    {
-                                        tabla[k, h].Enabled = false;
-                                    }
-                                }
-                                pictureBox1.Enabled = true;
-                                pictureBox2.Enabled = true;
-                                pictureBox3.Enabled = true;
-                                pictureBox4.Enabled = true;
-                                pictureBox1.Visible = true;
-                                pictureBox2.Visible = true;
-                                pictureBox3.Visible = true;
-                                pictureBox4.Visible = true;
-                            }
-                            List<Figura> kopija = KopiranjeListe(ref figure);
-                            if (Mat(Boja.bela, ref kopija) && Sah(Boja.bela, ref kopija, ref polja))
-                            {
-                                    MessageBox.Show("Crni je pobedio");
-                                    matic = true;
-                            }
-                            else if(Mat(Boja.bela, ref kopija))
-                            {
-                                MessageBox.Show("Pat");
-                                matic = true;
-                            }
-                        }
-                        else
-                        {
-                            MessageBox.Show(potez.Vrsta + " " + gde);
-                            selektovanje = true;
-                        }
+                    backgroundWorker1.RunWorkerAsync();
                     //}
                 }
             }
@@ -901,6 +711,81 @@ namespace BoardGames
             else if (Mat(Boja.crna, ref kopija))
             {
                 MessageBox.Show("Pat");
+            }
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            long nebitno;
+            Point gde;
+            Point igram;
+            (nebitno, gde, igram) = AI.Game(ref figure, ref polja, 3, Boja.crna);
+            int cimeigram = NadjiFiguru(igram);
+            potez = figure[cimeigram];
+            ObojTablu();
+            int index = NadjiFiguru(gde);
+            Figura pojedena = figure[0];
+            if (index != -1)
+            {
+                pojedena = figure[index];
+            }
+            Point pomoc = potez.GetPozicija();
+            bool odigraj = potez.OdigrajPotez(gde, ref figure, ref polja);
+
+            if (odigraj)
+            {
+
+                tabla[pomoc.X, pomoc.Y].Image = null;
+                //tabla[i, j].Image = potez.GetImage();
+                selektovanje = true;
+                beliIgra = true;
+                CrtajTablu(ref figure);
+
+                if (PesakNaKraju(ref figure) != -1)
+                {
+                    int momenat = PesakNaKraju(ref figure);
+                    Figura dama;
+                    if (figure[momenat].GetBoja() == Boja.crna)
+                        dama = new Dama(figure[momenat].GetPozicija(), Boja.crna, Image.FromFile("Crna kraljica.png"));
+                    else
+                        dama = new Dama(figure[momenat].GetPozicija(), Boja.bela, Image.FromFile("Bela kraljica.png"));
+
+                    figure.RemoveAt(momenat);
+                    figure.Add(dama);
+                    ObojTablu();
+
+                    tabla[dama.GetPozicija().X, dama.GetPozicija().Y].Image = null;
+                    tabla[dama.GetPozicija().X, dama.GetPozicija().Y].Image = dama.GetImage();
+
+                    List<Figura> xd = KopiranjeListe(ref figure);
+                    if (Mat(Boja.bela, ref xd) && Sah(Boja.bela, ref xd, ref polja))
+                    {
+                        MessageBox.Show("Crni je pobedio");
+                        matic = true;
+                    }
+                    else if (Mat(Boja.bela, ref xd))
+                    {
+                        MessageBox.Show("Pat");
+                        matic = true;
+                    }
+
+                }
+                List<Figura> kopija = KopiranjeListe(ref figure);
+                if (Mat(Boja.bela, ref kopija) && Sah(Boja.bela, ref kopija, ref polja))
+                {
+                    MessageBox.Show("Crni je pobedio");
+                    matic = true;
+                }
+                else if (Mat(Boja.bela, ref kopija))
+                {
+                    MessageBox.Show("Pat");
+                    matic = true;
+                }
+            }
+            else
+            {
+                MessageBox.Show(potez.Vrsta + " " + gde);
+                selektovanje = true;
             }
         }
     }
