@@ -7,8 +7,55 @@ using System.Threading.Tasks;
 
 namespace BoardGames
 {
-    class AI_engine
+    public class AI_engine
     {
+
+        private List<Figura> KopiranjeListe(List<Figura> figure)
+        {
+            List<Figura> kopija = new List<Figura>();
+            foreach (var x in figure)
+            {
+                switch (x.Vrsta)
+                {
+                    case "kralj":
+                        kopija.Add(new Kralj(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "dama":
+                        kopija.Add(new Dama(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "top":
+                        kopija.Add(new Top(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "lovac":
+                        kopija.Add(new Lovac(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "skakac":
+                        kopija.Add(new Skakac(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                    case "pesak":
+                        kopija.Add(new Pesak(x.GetPozicija(), x.GetBoja(), x.GetImage()));
+                        break;
+                }
+            }
+            return kopija;
+        }
+
+        PoljeInfo[,] KopiranjePolja(ref PoljeInfo[,] komedija)
+        {
+            PoljeInfo[,] kopija = new PoljeInfo[8, 8];
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    PoljeInfo dz;
+                    dz.zauzeto = komedija[i, j].zauzeto;
+                    dz.boja = komedija[i, j].boja;
+                    kopija[i, j] = dz;
+                }
+            }
+            return kopija;
+        }
+
         int[,] pesakPoz = new int[,] { { 0, 0, 0, 0, 0, 0, 0, 0 },
                                        {-31,   8,  -7, -37, -36, -14,   3, -31},
                                        { -22,   9,   5, -11, -10,  -2,   3, -19},
@@ -63,14 +110,33 @@ namespace BoardGames
                                         {-32,  10,  55,  56,  56,  55,  10,   3},
                                         {4,  54,  47, -99, -99,  60,  83, -62}};
 
-        int Mat_Lower = 60000 - 9290;
-        int Mat_Upper = 60000 + 9290;
-
-        long StanjeTable(ref List<Figura> figure)
+        bool Mat(Boja b, ref List<Figura> ecovece, ref PoljeInfo[,] polja)
         {
+            var komedija = KopiranjeListe(ecovece);
+            foreach (var figura in komedija)
+            {
+                if (figura.GetBoja() == b && figura.MoguciPotezi(ecovece, ref polja).Count > 0)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        long StanjeTable(ref List<Figura> figure, ref PoljeInfo[,] polja)
+        {
+            if(Mat(Boja.bela, ref figure, ref polja))
+            {
+                return long.MinValue;
+            }
+
+            if(Mat(Boja.crna, ref figure, ref polja))
+            {
+                return long.MaxValue;
+            }
+
             long skorCrni = 0;
             long skorBeli = 0;
-
             foreach(var figura in figure)
             {
                 long skor = 0;
@@ -109,57 +175,176 @@ namespace BoardGames
             return skorCrni - skorBeli;
         }
 
-        Point MiniMax(int depth, bool IsMax, List<Figura> figure, PoljeInfo[,] polja)
+        bool KrajIgre(ref List<Figura> figure, ref PoljeInfo[,] polja)
         {
-            foreach(var x in figure)
+            return (Mat(Boja.bela, ref figure, ref polja) || Mat(Boja.crna, ref figure, ref polja));
+        }
+        
+        (long, Point, Point) GameMax(ref List<Figura> figure, ref PoljeInfo[,] polja, long beta, int depth)
+        {
+            if(depth == 0 || KrajIgre(ref figure, ref polja))
             {
-                List<Point> komedija = x.MoguciPotezi(figure, ref polja);
-                foreach(var potez in komedija)
+                return (StanjeTable(ref figure, ref polja), new Point(-1, -1), new Point(-1, -1)); 
+            }
+
+            long alpha = long.MinValue;
+            Point best_move = new Point(-1, -1);
+            Point figpoz = new Point(-1, -1);
+
+            //var onokad = KopiranjeListe(ref figure);
+            for(int h = 0; h < figure.Count; h++)
+            {
+                var x = figure[h];
+                if(x.GetBoja() == Boja.crna)
                 {
-                    int i = 0;
-                    bool pojeo = false;
-                    Point pomoc = x.GetPozicija();
-                    foreach (var figura in figure)
+                    List<Point> komedija = x.MoguciPotezi(figure, ref polja);
+                    foreach (var potez in komedija)
                     {
-                        if (figura.GetPozicija() == potez)
+                        int i = 0;
+                        bool pojeo = false;
+                        Point pomoc = x.GetPozicija();
+                        foreach (var figura in figure)
                         {
-                            pojeo = true;
-                            break;
+                            if (figura.GetPozicija() == potez)
+                            {
+                                pojeo = true;
+                                break;
+                            }
+                            i++;
                         }
-                        i++;
-                    }
-                    Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
-                    if (pojeo)
-                    {
-                        pojedena = figure[i];
-                        figure.RemoveAt(i);
-                    }
-                    polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
-                    polja[potez.X, potez.Y].zauzeto = true;
-                    polja[potez.X, potez.Y].boja = x.GetBoja();
-                    x.SetPozicija(potez);
+                        Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                        if (pojeo)
+                        {
+                            pojedena = figure[i];
+                            figure.RemoveAt(i);
+                        }
+                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
+                        polja[potez.X, potez.Y].zauzeto = true;
+                        polja[potez.X, potez.Y].boja = x.GetBoja();
+                        x.SetPozicija(potez);
+
+                        long skor;
+                        var kopija = KopiranjeListe(figure);
+                        var kopolja = KopiranjePolja(ref polja);
+
+                        (skor, best_move, figpoz) = GameMin(ref kopija, ref kopolja, beta, depth - 1);
+                        if (skor > alpha)
+                        {
+                            alpha = skor;
+                            best_move = potez;
+                            figpoz = pomoc;
+                        }
+                        if (alpha >= beta)
+                            goto labela;
 
 
+                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
+                        if (pojeo)
+                        {
+                            polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = true;
+                            polja[x.GetPozicija().X, x.GetPozicija().Y].boja = pojedena.GetBoja();
+                        }
+                        polja[pomoc.X, pomoc.Y].zauzeto = true;
+                        polja[pomoc.X, pomoc.Y].boja = x.GetBoja();
+                        x.SetPozicija(pomoc);
+                        if (pojeo)
+                        {
+                            figure.Insert(i, pojedena);
 
-
-
-
-                    polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
-                    if (pojeo)
-                    {
-                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = true;
-                        polja[x.GetPozicija().X, x.GetPozicija().Y].boja = pojedena.GetBoja();
-                    }
-                    polja[pomoc.X, pomoc.Y].zauzeto = true;
-                    polja[pomoc.X, pomoc.Y].boja = x.GetBoja();
-                    x.SetPozicija(pomoc);
-                    if (pojeo)
-                    {
-                        figure.Insert(i, pojedena);
-
+                        }
                     }
                 }
             }
+            labela:
+            return (alpha, best_move, figpoz);
+        }
+
+        (long, Point, Point) GameMin(ref List<Figura> figure, ref PoljeInfo[,] polja, long alpha, int depth)
+        {
+            if (depth == 0 || KrajIgre(ref figure, ref polja))
+            {
+                return (StanjeTable(ref figure, ref polja), new Point(-1, -1), new Point(-1, -1));
+            }
+
+            long beta = long.MaxValue;
+            Point best_move = new Point(-1, -1);
+            Point figpoz = new Point(-1, -1);
+
+            //var onokad = KopiranjeListe(ref figure);
+            for (int h = 0; h < figure.Count; h++)
+            {
+                var x = figure[h];
+                if(x.GetBoja() == Boja.bela)
+                {
+                    List<Point> komedija = x.MoguciPotezi(figure, ref polja);
+                    foreach (var potez in komedija)
+                    {
+                        //igranje poteza
+                        int i = 0;
+                        bool pojeo = false;
+                        Point pomoc = x.GetPozicija();
+                        foreach (var figura in figure)
+                        {
+                            if (figura.GetPozicija() == potez)
+                            {
+                                pojeo = true;
+                                break;
+                            }
+                            i++;
+                        }
+                        Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                        if (pojeo)
+                        {
+                            pojedena = figure[i];
+                            figure.RemoveAt(i);
+                        }
+                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
+                        polja[potez.X, potez.Y].zauzeto = true;
+                        polja[potez.X, potez.Y].boja = x.GetBoja();
+                        x.SetPozicija(potez);
+
+                        //minimax algoritam
+                        long skor;
+                        var kopija = KopiranjeListe(figure);
+                        var kopolja = KopiranjePolja(ref polja);
+
+                        (skor, best_move, figpoz) = GameMax(ref kopija, ref kopolja, beta, depth - 1);
+                        if (skor < beta)
+                        {
+                            beta = skor;
+                            best_move = potez;
+                            figpoz = pomoc;
+                        }
+                        if (beta <= alpha)
+                            goto labela1;
+
+                        //vracanje poteza
+                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
+                        if (pojeo)
+                        {
+                            polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = true;
+                            polja[x.GetPozicija().X, x.GetPozicija().Y].boja = pojedena.GetBoja();
+                        }
+                        polja[pomoc.X, pomoc.Y].zauzeto = true;
+                        polja[pomoc.X, pomoc.Y].boja = x.GetBoja();
+                        x.SetPozicija(pomoc);
+                        if (pojeo)
+                        {
+                            figure.Insert(i, pojedena);
+
+                        }
+                    }
+                }  
+            }
+            labela1:
+            return (beta, best_move, figpoz);
+        }
+
+        public (long, Point, Point) Game(ref List<Figura> figure, ref PoljeInfo[,] polja, int depth, Boja boja)
+        {
+            if(boja == Boja.bela)
+                return GameMax(ref figure, ref polja, long.MaxValue, depth);
+            return GameMin(ref figure, ref polja, long.MinValue, depth);
         }
     }
 }

@@ -20,6 +20,7 @@ namespace BoardGames
         PoljeInfo[,] polja = new PoljeInfo[8, 8];
         PictureBox[,] tabla = new PictureBox[8, 8];
         List<Figura> figure = new List<Figura>();
+        AI_engine AI = new AI_engine();
         private void Form1_Load(object sender, EventArgs e)
         {
             int l = 50;
@@ -535,6 +536,9 @@ namespace BoardGames
 
                 else
                 {
+
+
+                    /*
                     if (selektovanje)
                     {
                         int figpoz = NadjiFiguru(new Point(i, j));
@@ -546,18 +550,26 @@ namespace BoardGames
                             selektovanje = false;
                             potez = figure[figpoz];
                         }
-                    }
-                    else
-                    {
-                        ObojTablu();
-                        int index = NadjiFiguru(new Point(i, j));
+                    }*/
+                    /*else
+                    {*/
+
+                    //poziv engina
+                    long nebitno;
+                    Point gde;
+                    Point igram;
+                    (nebitno, gde, igram) = AI.Game(ref figure, ref polja, 3, Boja.crna);
+                    int cimeigram = NadjiFiguru(igram);
+                    potez = figure[cimeigram];
+                    ObojTablu();
+                        int index = NadjiFiguru(gde);
                         Figura pojedena = figure[0];
                         if (index != -1)
                         {
                             pojedena = figure[index];
                         }
                         Point pomoc = potez.GetPozicija();
-                        bool odigraj = potez.OdigrajPotez(new Point(i, j), ref figure, ref polja);
+                        bool odigraj = potez.OdigrajPotez(gde, ref figure, ref polja);
 
                         if (odigraj)
                         {
@@ -655,10 +667,10 @@ namespace BoardGames
                         }
                         else
                         {
-                            MessageBox.Show("Nemoguc potez");
+                            MessageBox.Show(potez.Vrsta + " " + gde);
                             selektovanje = true;
                         }
-                    }
+                    //}
                 }
             }
         }

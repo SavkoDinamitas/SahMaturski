@@ -58,6 +58,11 @@ namespace BoardGames
             get;
         }
 
+        public abstract int Vrednost
+        {
+            get;
+        }
+
         public abstract void SetPozicija(Point p);
 
     }
@@ -80,6 +85,11 @@ namespace BoardGames
         public override string Vrsta
         {
             get { return "kralj"; }
+        }
+
+        public override int Vrednost
+        {
+            get { return 60000; }
         }
 
         public override void SetPozicija(Point p)
@@ -636,6 +646,10 @@ namespace BoardGames
             get { return "dama"; }
         }
 
+        public override int Vrednost
+        {
+            get { return 929; }
+        }
         public override void SetPozicija(Point p)
         {
             pozicija = p;
@@ -967,8 +981,9 @@ namespace BoardGames
                 int i = 0;
                 bool pojeo = false;
                 Point pomoc = pozicija;
-                foreach (var figura in figure)
+                for (int h = 0; h < figure.Count; h++)
                 {
+                    var figura = figure[h];
                     if (figura.GetPozicija() == p)
                     {
                         pojeo = true;
@@ -1062,6 +1077,11 @@ namespace BoardGames
             get { return "lovac"; }
         }
 
+        public override int Vrednost
+        {
+            get { return 320; }
+        }
+
         public override void SetPozicija(Point p)
         {
             pozicija = p;
@@ -1230,8 +1250,9 @@ namespace BoardGames
                 int i = 0;
                 bool pojeo = false;
                 Point pomoc = pozicija;
-                foreach (var figura in figure)
+                for (int h = 0; h < figure.Count; h++)
                 {
+                    var figura = figure[h];
                     if (figura.GetPozicija() == p)
                     {
                         pojeo = true;
@@ -1324,6 +1345,11 @@ namespace BoardGames
             get { return "top"; }
         }
 
+        public override int Vrednost
+        {
+            get { return 479; }
+        }
+
         public override void SetPozicija(Point p)
         {
             pozicija = p;
@@ -1482,8 +1508,9 @@ namespace BoardGames
                 int i = 0;
                 bool pojeo = false;
                 Point pomoc = pozicija;
-                foreach (var figura in figure)
+                for (int h = 0; h < figure.Count; h++)
                 {
+                    var figura = figure[h];
                     if (figura.GetPozicija() == p)
                     {
                         pojeo = true;
@@ -1577,6 +1604,11 @@ namespace BoardGames
             get { return "skakac"; }
         }
 
+        public override int Vrednost
+        {
+            get { return 280; }
+        }
+
         public override void SetPozicija(Point p)
         {
             pozicija = p;
@@ -1633,8 +1665,9 @@ namespace BoardGames
                 int i = 0;
                 bool pojeo = false;
                 Point pomoc = pozicija;
-                foreach (var figura in figure)
+                for (int h = 0; h < figure.Count; h++)
                 {
+                    var figura = figure[h];
                     if (figura.GetPozicija() == p)
                     {
                         pojeo = true;
@@ -1729,6 +1762,11 @@ namespace BoardGames
             get { return "pesak"; }
         }
 
+        public override int Vrednost
+        {
+            get { return 100; }
+        }
+
         public override void SetPozicija(Point p)
         {
             pozicija = p;
@@ -1763,7 +1801,7 @@ namespace BoardGames
 
             if(boja == Boja.crna)
             {
-                if (!polja[pozicija.X, pozicija.Y+1].zauzeto)
+                if (InBound(new Point(pozicija.X, pozicija.Y + 1)) && !polja[pozicija.X, pozicija.Y+1].zauzeto)
                     potezi.Add(new Point(pozicija.X, pozicija.Y + 1));
                 if (InBound(new Point(pozicija.X + 1, pozicija.Y + 1)) && polja[pozicija.X + 1, pozicija.Y + 1].zauzeto && polja[pozicija.X + 1, pozicija.Y + 1].boja != boja)
                     potezi.Add(new Point(pozicija.X + 1, pozicija.Y + 1));
@@ -1774,7 +1812,7 @@ namespace BoardGames
 
             else
             {
-                if (!polja[pozicija.X, pozicija.Y - 1].zauzeto)
+                if (InBound(new Point(pozicija.X, pozicija.Y- 1)) && !polja[pozicija.X, pozicija.Y - 1].zauzeto)
                     potezi.Add(new Point(pozicija.X, pozicija.Y - 1));
                 if (InBound(new Point(pozicija.X + 1, pozicija.Y - 1)) && polja[pozicija.X + 1, pozicija.Y - 1].zauzeto && polja[pozicija.X + 1, pozicija.Y - 1].boja != boja)
                     potezi.Add(new Point(pozicija.X + 1, pozicija.Y - 1));
@@ -1826,8 +1864,9 @@ namespace BoardGames
                 int i = 0;
                 bool pojeo = false;
                 Point pomoc = pozicija;
-                foreach (var figura in figure)
+                for (int h = 0; h < figure.Count; h++)
                 {
+                    var figura = figure[h];
                     if (figura.GetPozicija() == p)
                     {
                         pojeo = true;
