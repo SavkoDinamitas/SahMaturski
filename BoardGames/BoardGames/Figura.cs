@@ -523,7 +523,7 @@ namespace BoardGames
             }
 
 
-            List<Point> potezi1 = new List<Point>();
+            /*List<Point> potezi1 = new List<Point>();
             foreach (var p in potezi)
             {
                 int i = 0;
@@ -568,8 +568,8 @@ namespace BoardGames
 
                 }
             }
-
-            return potezi1;
+            */
+            return potezi;
         }
 
         public override bool OdigrajPotez(Point p, ref List<Figura> figure, ref PoljeInfo[,] polja)

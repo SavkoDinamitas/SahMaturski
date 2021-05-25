@@ -315,7 +315,7 @@ namespace BoardGames
                         Point xd;
                         Point cemuovo;
                         (skor, xd, cemuovo) = GameMin(ref kopija, ref kopolja, beta, depth - 1);
-                        if (skor > alpha)
+                        if (skor >= alpha)
                         {
                             alpha = skor;
                             best_move = potez;
@@ -398,7 +398,7 @@ namespace BoardGames
                         Point xd;
                         Point cemuovo;
                         (skor, xd, cemuovo) = GameMax(ref kopija, ref kopolja, beta, depth - 1);
-                        if (skor < beta)
+                        if (skor <= beta)
                         {
                             beta = skor;
                             best_move = potez;
