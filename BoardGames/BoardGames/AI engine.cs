@@ -365,7 +365,6 @@ namespace BoardGames
                     skorCrni = skorCrni + skor + figura.Vrednost;
                 }
             }
-            //Console.WriteLine((skorBeli - skorCrni).ToString());
             return skorBeli - skorCrni;
         }
 
@@ -537,6 +536,8 @@ namespace BoardGames
             labela1:
             return (beta, best_move, figpoz);
         }
+
+
 
         public (long, Point, Point) Game(ref List<Figura> figure, ref PoljeInfo[,] polja, int depth, Boja boja)
         {
