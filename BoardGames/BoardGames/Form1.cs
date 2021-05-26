@@ -281,44 +281,6 @@ namespace BoardGames
         private bool Mat(Boja b, ref List<Figura> ecovece)
         {
             ecovece = KopiranjeListe(ref figure);
-            /*
-            List<Figura> kopija = KopiranjeListe(ref ecovece);
-            PoljeInfo[,] xd = KopiranjePolja(ref polja);
-            for(int i = 0; i < kopija.Count; i++)
-            {
-                Figura figura = kopija[i]; 
-                if(figura.GetBoja() == b)
-                {
-                    var pozicija = figura.GetPozicija();
-                    var potezi = figura.MoguciPotezi(kopija, ref xd);
-                    Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("Crna kraljica.png"));
-                    foreach (var potez in potezi)
-                    {
-                        xd[pozicija.X, pozicija.Y].zauzeto = false;
-                        Boja pocBoja = xd[potez.X, potez.Y].boja;
-                        xd[potez.X, potez.Y].zauzeto = true;
-                        xd[potez.X, potez.Y].boja = b;
-                        int index = NadjiFiguru(potez, ref kopija);
-                        if (index != -1)
-                            pojedena = kopija[index];
-                        Point megaXd = Pesak.anPasan;
-                        figura.OdigrajPotez(potez, ref kopija, ref xd);
-                        Pesak.anPasan = megaXd;
-                        if (!Sah(b, ref kopija, ref xd))
-                        {
-                            //this.Text = figura.Vrsta + " " + potez.X.ToString() + " " + potez.Y.ToString();
-                            return false;
-                        }
-                        xd[pozicija.X, pozicija.Y].zauzeto = true;
-                        xd[potez.X, potez.Y].zauzeto = false;
-                        xd[potez.X, potez.Y].boja = pocBoja;
-                        figura.SetPozicija(pozicija);
-                        if (index != -1)
-                            kopija.Add(pojedena);
-                    }
-                }
-            }  
-            return true;*/
             foreach(var figura in ecovece)
             {
                 if (figura.GetBoja() == b && figura.MoguciPotezi(figure, ref polja).Count > 0)
@@ -395,6 +357,8 @@ namespace BoardGames
         bool selektovanje = true;
         Figura potez;
         bool matic = false;
+        bool biranjeFigure = false;
+        string jasamkreten;
         private void KlikNaPolje(object sender, EventArgs e)
         {
             if (!matic && !backgroundWorker1.IsBusy)
@@ -409,7 +373,7 @@ namespace BoardGames
                     if (selektovanje)
                     {
                         int figpoz = NadjiFiguru(new Point(i, j));
-                        this.Text = i.ToString() + " " + j.ToString();
+                        //this.Text = i.ToString() + " " + j.ToString();
                         if (figpoz != -1 && figure[figpoz].GetBoja() == Boja.bela)
                         {
                             ObojiMogucaPolja(figure[figpoz].MoguciPotezi(figure, ref polja));
@@ -455,6 +419,7 @@ namespace BoardGames
                                 pictureBox2.Visible = true;
                                 pictureBox3.Visible = true;
                                 pictureBox4.Visible = true;
+                                biranjeFigure = true;
                             }
                             
                             List<Figura> kopija = KopiranjeListe(ref figure);
@@ -476,10 +441,11 @@ namespace BoardGames
                     }
                 }
 
-                if(!beliIgra)
+                if(!beliIgra && !biranjeFigure && !matic)
                 {
                     //poziv engina
                     backgroundWorker1.RunWorkerAsync();
+                    this.Text = jasamkreten;
                     //}
                 }
             }
@@ -530,8 +496,7 @@ namespace BoardGames
                 matic = true;
             }
             
-            kopija = KopiranjeListe(ref figure);
-            if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
+            else if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
             {
                 MessageBox.Show("Beli je pobedio");
                 matic = true;
@@ -540,7 +505,11 @@ namespace BoardGames
             {
                 MessageBox.Show("Pat");
             }
-
+            else
+            {
+                biranjeFigure = false;
+                backgroundWorker1.RunWorkerAsync();
+            }
         }
 
         private void pictureBox2_Click(object sender, EventArgs e)
@@ -588,8 +557,7 @@ namespace BoardGames
                 matic = true;
             }
 
-            kopija = KopiranjeListe(ref figure);
-            if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
+            else if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
             {
                 MessageBox.Show("Beli je pobedio");
                 matic = true;
@@ -597,6 +565,11 @@ namespace BoardGames
             else if (Mat(Boja.crna, ref kopija))
             {
                 MessageBox.Show("Pat");
+            }
+            else
+            {
+                biranjeFigure = false;
+                backgroundWorker1.RunWorkerAsync();
             }
         }
 
@@ -645,8 +618,7 @@ namespace BoardGames
                 matic = true;
             }
 
-            kopija = KopiranjeListe(ref figure);
-            if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
+            else if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
             {
                 MessageBox.Show("Beli je pobedio");
                 matic = true;
@@ -654,6 +626,11 @@ namespace BoardGames
             else if (Mat(Boja.crna, ref kopija))
             {
                 MessageBox.Show("Pat");
+            }
+            else
+            {
+                biranjeFigure = false;
+                backgroundWorker1.RunWorkerAsync();
             }
         }
 
@@ -702,8 +679,7 @@ namespace BoardGames
                 matic = true;
             }
 
-            kopija = KopiranjeListe(ref figure);
-            if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
+            else if (Mat(Boja.crna, ref kopija) && Sah(Boja.crna, ref kopija, ref polja))
             {
                 MessageBox.Show("Beli je pobedio");
                 matic = true;
@@ -711,6 +687,12 @@ namespace BoardGames
             else if (Mat(Boja.crna, ref kopija))
             {
                 MessageBox.Show("Pat");
+            }
+
+            else
+            {
+                biranjeFigure = false;
+                backgroundWorker1.RunWorkerAsync();
             }
         }
 
@@ -720,6 +702,8 @@ namespace BoardGames
             Point gde;
             Point igram;
             (nebitno, gde, igram) = AI.Game(ref figure, ref polja, 3, Boja.crna);
+            Console.WriteLine(nebitno.ToString());
+            jasamkreten = nebitno.ToString();
             int cimeigram = NadjiFiguru(igram);
             potez = figure[cimeigram];
             ObojTablu();

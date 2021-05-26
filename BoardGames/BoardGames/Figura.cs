@@ -64,7 +64,6 @@ namespace BoardGames
         }
 
         public abstract void SetPozicija(Point p);
-
     }
 
     public class Kralj : Figura
@@ -150,6 +149,19 @@ namespace BoardGames
             return kopija;
         }
 
+        public static Point NadjiMe(Boja b, ref List<Figura> figure)
+        {
+            Point pozicijaKralja = new Point(1, 1);
+            foreach (var x in figure)
+            {
+                if (x.GetBoja() != b && x.Vrsta == "kralj")
+                {
+                    pozicijaKralja = x.GetPozicija();
+                }
+            }
+            return pozicijaKralja;
+        }
+
         public static bool Sah(Boja b, ref List<Figura> ecovece, ref PoljeInfo[,] mast)
         {
             Point pozicijaKralja = new Point(1, 1);
@@ -221,6 +233,60 @@ namespace BoardGames
                     if (!pomoc && InBound(x))
                         potezi.Add(x);
                 }
+
+
+            /*
+            foreach (var p in tacke)
+            {
+                if(InBound(p) && polja[p.X, p.Y].zauzeto && polja[p.X, p.Y].boja == boja)
+                {
+                    ;
+                }
+                else if(InBound(p))
+                {
+                    int i = 0;
+                    bool pojeo = false;
+                    Point pomoc = pozicija;
+                    for (int h = 0; h < figure.Count; h++)
+                    {
+                        var figura = figure[h];
+                        if (figura.GetPozicija() == p)
+                        {
+                            pojeo = true;
+                            break;
+                        }
+                        i++;
+                    }
+                    Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                    if (pojeo)
+                    {
+                        pojedena = figure[i];
+                        figure.RemoveAt(i);
+                    }
+                    polja[pozicija.X, pozicija.Y].zauzeto = false;
+                    polja[p.X, p.Y].zauzeto = true;
+                    polja[p.X, p.Y].boja = boja;
+                    pozicija = p;
+                    if (!Sah(boja, ref figure, ref polja))
+                    {
+                        potezi.Add(p);
+                    }
+                    polja[pozicija.X, pozicija.Y].zauzeto = false;
+                    if (pojeo)
+                    {
+                        polja[pozicija.X, pozicija.Y].zauzeto = true;
+                        polja[pozicija.X, pozicija.Y].boja = pojedena.GetBoja();
+                    }
+                    polja[pomoc.X, pomoc.Y].zauzeto = true;
+                    polja[pomoc.X, pomoc.Y].boja = boja;
+                    this.pozicija = pomoc;
+                    if (pojeo)
+                    {
+                        figure.Insert(i, pojedena);
+
+                    }
+                }
+            }*/
 
             //mala rokada belog kralja
             List<Point> wtf;
@@ -522,8 +588,8 @@ namespace BoardGames
                 }
             }
 
-
-            /*List<Point> potezi1 = new List<Point>();
+            /*
+            List<Point> potezi1 = new List<Point>();
             foreach (var p in potezi)
             {
                 int i = 0;
@@ -549,7 +615,7 @@ namespace BoardGames
                 polja[p.X, p.Y].zauzeto = true;
                 polja[p.X, p.Y].boja = boja;
                 pozicija = p;
-                if (!Kralj.Sah(boja, ref figure, ref polja))
+                if (!Sah(boja, ref figure, ref polja))
                 {
                     potezi1.Add(p);
                 }
@@ -567,8 +633,8 @@ namespace BoardGames
                     figure.Insert(i, pojedena);
 
                 }
-            }
-            */
+            }*/
+            
             return potezi;
         }
 
@@ -724,13 +790,14 @@ namespace BoardGames
 
         public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
+            Point djeBaKralj = Kralj.NadjiMe(boja, ref figure);
             List<Point> potezi = new List<Point>();
             int x = pozicija.X - 1;
             int y = pozicija.Y - 1;
             //gore levo  
             while (x >= 0 && y >= 0)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -744,7 +811,7 @@ namespace BoardGames
             y = pozicija.Y - 1;
             while (x >= 0 && y >= 0)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -758,7 +825,7 @@ namespace BoardGames
             y = pozicija.Y - 1;
             while (x <= 7 && y >= 0)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -773,7 +840,7 @@ namespace BoardGames
             y = pozicija.Y;
             while (x <= 7 && y <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -787,7 +854,7 @@ namespace BoardGames
             y = pozicija.Y + 1;
             while (x <= 7 && y <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -802,7 +869,7 @@ namespace BoardGames
             y = pozicija.Y + 1;
             while (x <= 7 && y <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -816,7 +883,7 @@ namespace BoardGames
             y = pozicija.Y + 1;
             while (x >= 0 && y <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -831,7 +898,7 @@ namespace BoardGames
             y = pozicija.Y;
             while (x >= 0 && y <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -1131,6 +1198,7 @@ namespace BoardGames
 
         public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
+            Point djeBaKralj = Kralj.NadjiMe(boja, ref figure);
             List<Point> potezi = new List<Point>();
             int x = pozicija.X - 1;
             int y = pozicija.Y - 1;
@@ -1138,7 +1206,7 @@ namespace BoardGames
             //gore levo
             while (x >= 0 && y >= 0)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -1153,7 +1221,7 @@ namespace BoardGames
             //gore desno
             while (x <= 7 && y >= 0)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -1168,7 +1236,7 @@ namespace BoardGames
             //dole levo
             while (x >= 0 && y <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -1183,7 +1251,7 @@ namespace BoardGames
             //dole desno
             while (x <= 7 && y <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -1399,13 +1467,14 @@ namespace BoardGames
 
         public override List<Point> NapadnutaPolja(List<Figura> figure, ref PoljeInfo[,] polja)
         {
+            Point djeBaKralj = Kralj.NadjiMe(boja, ref figure);
             List<Point> potezi = new List<Point>();
             int x = pozicija.X - 1;
             int y = pozicija.Y;
             //levo
             while (x >= 0)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -1419,7 +1488,7 @@ namespace BoardGames
             //desno
             while (x <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -1433,7 +1502,7 @@ namespace BoardGames
             //dole
             while (y <= 7)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
@@ -1447,7 +1516,7 @@ namespace BoardGames
             //gore
             while (y >= 0)
             {
-                if (polja[x, y].zauzeto)
+                if (polja[x, y].zauzeto && new Point(x, y) != djeBaKralj)
                 {
                     potezi.Add(new Point(x, y));
                     break;
