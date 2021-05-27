@@ -701,7 +701,7 @@ namespace BoardGames
             long nebitno;
             Point gde;
             Point igram;
-            (nebitno, gde, igram) = AI.Game(ref figure, ref polja, 3, Boja.crna);
+            (nebitno, gde, igram) = AI.GameOptimizovano(ref figure, ref polja, 3, Boja.crna, AI.StanjeTable(ref figure, ref polja));
             Console.WriteLine(nebitno.ToString());
             jasamkreten = nebitno.ToString();
             int cimeigram = NadjiFiguru(igram);

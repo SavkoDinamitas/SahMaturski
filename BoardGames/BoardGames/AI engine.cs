@@ -55,7 +55,7 @@ namespace BoardGames
             }
             return kopija;
         }
-        /*
+        
         int[,] pesakPozB = new int[,] {{ 928, 928, 928, 928, 928, 928, 928, 928},
             { 78,  83,  86,  73, 102,  82,  85,  90 },
              { 7,  29,  21,  44,  40,  31,  44,   7 },
@@ -165,9 +165,9 @@ namespace BoardGames
                                         {-55,  50,  11,  -4, -19,  13,   0, -49},
                                         {-62,  12, -57,  44, -67,  28,  37, -31},
                                         {-32,  10,  55,  56,  56,  55,  10,   3},
-                                        {4,  54,  47, -99, -99,  60,  83, -62}};*/
+                                        {4,  54,  47, -99, -99,  60,  83, -62}};
 
-
+/*
         int[,] pesakPozB = new int[,] { {0,  0,  0,  0,  0,  0,  0,  0 },
                                         { 50, 50, 50, 50, 50, 50, 50, 50 },
                                         { 10, 10, 20, 30, 30, 20, 10, 10},
@@ -275,7 +275,7 @@ namespace BoardGames
                                         {  -30,-40,-40,-50,-50,-40,-40,-30},
                                         { -30,-40,-40,-50,-50,-40,-40,-30},
                                         {  -30,-40,-40,-50,-50,-40,-40,-30},
-                                        { -30,-40,-40,-50,-50,-40,-40,-30}};
+                                        { -30,-40,-40,-50,-50,-40,-40,-30}};*/
 
         bool Mat(Boja b, ref List<Figura> ecovece, ref PoljeInfo[,] polja)
         {
@@ -290,7 +290,7 @@ namespace BoardGames
             return true;
         }
 
-        long StanjeTable(ref List<Figura> figure, ref PoljeInfo[,] polja)
+        public long StanjeTable(ref List<Figura> figure, ref PoljeInfo[,] polja)
         {
             if(Mat(Boja.bela, ref figure, ref polja))
             {
@@ -366,6 +366,62 @@ namespace BoardGames
                 }
             }
             return skorBeli - skorCrni;
+        }
+
+
+        long SkorZaFiguru(ref Figura figura)
+        {
+            long skor = 0;
+            if (figura.GetBoja() == Boja.bela)
+            {
+                switch (figura.Vrsta)
+                {
+                    case "kralj":
+                        skor += kraljPozB[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "dama":
+                        skor += damaPozB[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "top":
+                        skor += topPozB[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "lovac":
+                        skor += lovacPozB[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "skakac":
+                        skor += skakacPozB[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "pesak":
+                        skor += pesakPozB[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                }
+            }
+            else
+            {
+                switch (figura.Vrsta)
+                {
+                    case "kralj":
+                        skor += kraljPozC[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "dama":
+                        skor += damaPozC[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "top":
+                        skor += topPozC[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "lovac":
+                        skor += lovacPozC[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "skakac":
+                        skor += skakacPozC[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                    case "pesak":
+                        skor += pesakPozC[figura.GetPozicija().Y, figura.GetPozicija().X];
+                        break;
+                }
+            }
+
+            return skor;
         }
 
         bool KrajIgre(ref List<Figura> figure, ref PoljeInfo[,] polja)
@@ -547,5 +603,197 @@ namespace BoardGames
                 return GameMax(ref kopija, ref kopolja, long.MaxValue, depth);
             return GameMin(ref kopija, ref kopolja, long.MinValue, depth);
         }
+
+
+
+
+
+        //pokusaj optimizacije
+
+        (long, Point, Point) GameMaxOptimizovano(ref List<Figura> figure, ref PoljeInfo[,] polja, long beta, int depth, long pocStanje)
+        {
+            if (depth == 0 || KrajIgre(ref figure, ref polja))
+            {
+                return (pocStanje, new Point(-1, -1), new Point(-1, -1));
+            }
+
+            long nigga = pocStanje;
+
+            long alpha = long.MinValue;
+            Point best_move = new Point(-1, -1);
+            Point figpoz = new Point(-1, -1);
+
+            for (int h = 0; h < figure.Count; h++)
+            {
+                var x = figure[h];
+                if (x.GetBoja() == Boja.bela)
+                {
+                    List<Point> komedija = x.MoguciPotezi(figure, ref polja);
+                    foreach (var potez in komedija)
+                    {
+                        int i = 0;
+                        bool pojeo = false;
+                        Point pomoc = x.GetPozicija();
+                        foreach (var figura in figure)
+                        {
+                            if (figura.GetPozicija() == potez)
+                            {
+                                pojeo = true;
+                                break;
+                            }
+                            i++;
+                        }
+                        Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                        if (pojeo)
+                        {
+                            pocStanje += figure[i].Vrednost;
+                            pojedena = figure[i];
+                            figure.RemoveAt(i);
+                        }
+                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
+                        polja[potez.X, potez.Y].zauzeto = true;
+                        polja[potez.X, potez.Y].boja = x.GetBoja();
+                        pocStanje -= SkorZaFiguru(ref x);
+                        x.SetPozicija(potez);
+                        pocStanje += SkorZaFiguru(ref x);
+
+
+                        long skor;
+                        var kopija = KopiranjeListe(figure);
+                        var kopolja = KopiranjePolja(ref polja);
+
+                        //minimax
+                        Point xd;
+                        Point cemuovo;
+                        (skor, xd, cemuovo) = GameMinOptimizovano(ref kopija, ref kopolja, alpha, depth - 1, pocStanje);
+                        pocStanje = nigga;
+                        if (skor >= alpha)
+                        {
+                            alpha = skor;
+                            best_move = potez;
+                            figpoz = pomoc;
+                        }
+                        if (alpha >= beta)
+                            goto labela;
+
+
+                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
+                        if (pojeo)
+                        {
+                            polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = true;
+                            polja[x.GetPozicija().X, x.GetPozicija().Y].boja = pojedena.GetBoja();
+                        }
+                        polja[pomoc.X, pomoc.Y].zauzeto = true;
+                        polja[pomoc.X, pomoc.Y].boja = x.GetBoja();
+                        x.SetPozicija(pomoc);
+                        if (pojeo)
+                        {
+                            figure.Insert(i, pojedena);
+
+                        }
+                    }
+                }
+            }
+        labela:
+            return (alpha, best_move, figpoz);
+        }
+
+
+        (long, Point, Point) GameMinOptimizovano(ref List<Figura> figure, ref PoljeInfo[,] polja, long alpha, int depth, long pocStanje)
+        {
+            if (depth == 0 || KrajIgre(ref figure, ref polja))
+            {
+                return (StanjeTable(ref figure, ref polja), new Point(-1, -1), new Point(-1, -1));
+            }
+            long nigga = pocStanje;
+            long beta = long.MaxValue;
+            Point best_move = new Point(-1, -1);
+            Point figpoz = new Point(-1, -1);
+
+            //var onokad = KopiranjeListe(ref figure);
+            for (int h = 0; h < figure.Count; h++)
+            {
+                var x = figure[h];
+                if (x.GetBoja() == Boja.crna)
+                {
+                    List<Point> komedija = x.MoguciPotezi(figure, ref polja);
+                    foreach (var potez in komedija)
+                    {
+                        //igranje poteza
+                        int i = 0;
+                        bool pojeo = false;
+                        Point pomoc = x.GetPozicija();
+                        foreach (var figura in figure)
+                        {
+                            if (figura.GetPozicija() == potez)
+                            {
+                                pojeo = true;
+                                break;
+                            }
+                            i++;
+                        }
+                        Figura pojedena = new Pesak(new Point(1, 1), Boja.bela, Image.FromFile("CrniPijun.png"));
+                        if (pojeo)
+                        {
+                            pocStanje -= figure[i].Vrednost;
+                            pojedena = figure[i];
+                            figure.RemoveAt(i);
+                        }
+                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
+                        polja[potez.X, potez.Y].zauzeto = true;
+                        polja[potez.X, potez.Y].boja = x.GetBoja();
+                        pocStanje += SkorZaFiguru(ref x);
+                        x.SetPozicija(potez);
+                        pocStanje -= SkorZaFiguru(ref x);
+                        //minimax algoritam
+                        long skor;
+                        var kopija = KopiranjeListe(figure);
+                        var kopolja = KopiranjePolja(ref polja);
+
+                        Point xd;
+                        Point cemuovo;
+                        (skor, xd, cemuovo) = GameMaxOptimizovano(ref kopija, ref kopolja, beta, depth - 1, pocStanje);
+                        pocStanje = nigga;
+                        if (skor <= beta)
+                        {
+                            beta = skor;
+                            best_move = potez;
+                            figpoz = pomoc;
+                        }
+                        if (beta <= alpha)
+                            goto labela1;
+
+                        //vracanje poteza
+                        polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = false;
+                        if (pojeo)
+                        {
+                            polja[x.GetPozicija().X, x.GetPozicija().Y].zauzeto = true;
+                            polja[x.GetPozicija().X, x.GetPozicija().Y].boja = pojedena.GetBoja();
+                        }
+                        polja[pomoc.X, pomoc.Y].zauzeto = true;
+                        polja[pomoc.X, pomoc.Y].boja = x.GetBoja();
+                        x.SetPozicija(pomoc);
+                        if (pojeo)
+                        {
+                            figure.Insert(i, pojedena);
+
+                        }
+                    }
+                }
+            }
+        labela1:
+            return (beta, best_move, figpoz);
+        }
+
+
+        public (long, Point, Point) GameOptimizovano(ref List<Figura> figure, ref PoljeInfo[,] polja, int depth, Boja boja, long pocStanje)
+        {
+            var kopija = KopiranjeListe(figure);
+            var kopolja = KopiranjePolja(ref polja);
+            if (boja == Boja.bela)
+                return GameMaxOptimizovano(ref kopija, ref kopolja, long.MaxValue, depth, pocStanje);
+            return GameMinOptimizovano(ref kopija, ref kopolja, long.MinValue, depth, pocStanje);
+        }
+
     }
 }
