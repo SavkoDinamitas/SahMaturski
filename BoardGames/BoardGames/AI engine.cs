@@ -101,7 +101,7 @@ namespace BoardGames
            { -36, -18,   0, -19, -15, -15, -21, -38},
            { -39, -30, -31, -13, -31, -36, -34, -42}};
 
-        int[,] kraljPozC = new int[,] { { 4,  54,  47, -99, -99,  60,  83, -62 },
+        int[,] kraljPozB = new int[,] { { 4,  54,  47, -99, -99,  60,  83, -62 },
            { -32,  10,  55,  56,  56,  55,  10,   3 },
            { -62,  12, -57,  44, -67,  28,  37, -31},
            { -55,  50,  11,  -4, -19,  13,   0, -49},
@@ -158,7 +158,7 @@ namespace BoardGames
                                         {14,  32,  60, -10,  20,  76,  57,  24},
                                         {6,   1,  -8,-104,  69,  24,  88,  26}};
 
-        int[,] kraljPozB = new int[,] { { 17,  30,  -3, -14,   6,  -1,  40,  18 },
+        int[,] kraljPozC = new int[,] { { 17,  30,  -3, -14,   6,  -1,  40,  18 },
                                         {-4,   3, -14, -50, -57, -18,  13,   4},
                                         {-47, -42, -43, -79, -64, -32, -29, -32},
                                         {-55, -43, -52, -28, -51, -47,  -8, -50},
@@ -789,6 +789,13 @@ namespace BoardGames
                         pocStanje += SkorZaFiguru(ref x);
                         x.SetPozicija(potez);
                         pocStanje -= SkorZaFiguru(ref x);
+
+                        //provera mrcvarenja
+                        if(Mat(Boja.bela, ref figure, ref polja))
+                        {
+                            return (long.MinValue, potez, pomoc);
+                        }
+
                         //minimax algoritam
                         long skor;
                         var kopija = KopiranjeListe(figure);
